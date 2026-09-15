@@ -19,6 +19,12 @@
                     <x-nav-link :href="route('admin.areas.index')" :active="request()->routeIs('admin.areas.*')">
                         {{ __('Áreas') }}
                     </x-nav-link>
+
+                    @role('admin')
+                 <x-nav-link :href="route('admin.usuarios.index')" :active="request()->routeIs('admin.usuarios.*')">
+                    {{ __('Usuarios') }}
+                     </x-nav-link>
+@endrole
 </div>
 
                 

@@ -9,11 +9,17 @@ use Illuminate\Support\Str;
 
 class AreaController extends Controller
 {
-    public function index()
+   public function index()
     {
-        $areas = Area::orderBy('orden')->get();
+    $user = auth()->user();
 
-        return view('admin.areas.index', compact('areas'));
+    if ($user->hasRole('admin')) {
+        $areas = Area::orderBy('orden')->get();
+    } else {
+        $areas = $user->areas()->orderBy('orden')->get();
+    }
+
+    return view('admin.areas.index', compact('areas'));
     }
 
     public function create()

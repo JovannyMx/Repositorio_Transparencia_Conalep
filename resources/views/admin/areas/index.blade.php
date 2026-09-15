@@ -4,10 +4,12 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Áreas de la administración
             </h2>
-            <a href="{{ route('admin.areas.create') }}"
-               class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                + Nueva área
-            </a>
+            @role('admin')
+                <a href="{{ route('admin.areas.create') }}"
+                 class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                 + Nueva área
+                </a>
+            @endrole
         </div>
     </x-slot>
 
@@ -49,14 +51,16 @@
                                      class="text-gray-600 hover:text-gray-900">Secciones</a>
                                     <a href="{{ route('admin.areas.documentos.index', $area) }}"
                                          class="text-gray-600 hover:text-gray-900">Documentos</a>
-                                    <a href="{{ route('admin.areas.edit', $area) }}"
-                                         class="text-indigo-600 hover:text-indigo-900">Editar</a>
-                                    <form action="{{ route('admin.areas.destroy', $area) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('¿Eliminar esta área? Esto también eliminará sus secciones y documentos.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
-                                    </form>
+                                    @role('admin')
+                                        <a href="{{ route('admin.areas.edit', $area) }}"
+                                             class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                                        <form action="{{ route('admin.areas.destroy', $area) }}" method="POST" class="inline"
+                                              onsubmit="return confirm('¿Eliminar esta área? Esto también eliminará sus secciones y documentos.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
+                                        </form>
+                                    @endrole
                                 </td>
                             </tr>
                         @empty
