@@ -1,9 +1,18 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\AreaController as PublicAreaController;
+use App\Http\Controllers\Public\DocumentoController as PublicDocumentoController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
-// 1. Portal Principal de Transparencia (RF-01)
+
+/*
+|--------------------------------------------------------------------------
+| Rutas Públicas (Portal de Transparencia)
+|--------------------------------------------------------------------------
+*/
+
+// 1. Portal Principal (Home)
 Route::get('/', function () {
     $areas = [
         [
@@ -39,7 +48,7 @@ Route::get('/', function () {
     return view('welcome', compact('areas'));
 })->name('home');
 
-// 2. Vista Detallada de Documentos por Área (RF-02, RF-03)
+// 2. Vista Detallada por Área
 Route::get('/area/{slug}', function ($slug) {
     $areas = [
         'direccion-general' => [
@@ -99,7 +108,7 @@ Route::get('/area/{slug}', function ($slug) {
     return view('area-detalle', compact('area', 'documentos'));
 })->name('areas.public.show');
 
-// 3. Buscador Global Público (RF-05)
+// 3. Buscador Global Público
 Route::get('/buscar', function (Request $request) {
     $query = $request->input('q', '');
 
@@ -129,22 +138,18 @@ Route::get('/buscar', function (Request $request) {
     return view('buscar-resultados', compact('query', 'resultados'));
 })->name('buscar.public');
 
-// 4. Formulario / Contacto de Transparencia
+// 4. Contacto de Transparencia
 Route::get('/contacto-transparencia', function () {
     return view('contacto-transparencia');
 })->name('contacto.public');
 
-// Rutas Autenticadas y Panel de Administración
-=======
 
-//Aqui estan las rutas para la parte publica :)
+/*
+|--------------------------------------------------------------------------
+| Rutas Autenticadas y Panel de Administración
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/', [\App\Http\Controllers\Public\AreaController::class, 'index'])->name('publico.areas.index');
-Route::get('/area/{area}', [\App\Http\Controllers\Public\AreaController::class, 'show'])->name('publico.areas.show');
-Route::get('/documento/{liga}', [\App\Http\Controllers\Public\DocumentoController::class, 'preview'])->name('publico.documentos.preview');
-Route::get('/documento/{liga}/descargar', [\App\Http\Controllers\Public\DocumentoController::class, 'descargar'])->name('publico.documentos.descargar');
-
->>>>>>> origin/main
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -155,12 +160,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::prefix('admin')->name('admin.')->group(function () {
-<<<<<<< HEAD
-        Route::resource('areas', \App\Http\Controllers\Admin\AreaController::class);
 
-        Route::prefix('areas/{area}/secciones')->name('areas.secciones.')->group(function () {
-=======
-
+        // Administración de Áreas
         Route::get('areas', [\App\Http\Controllers\Admin\AreaController::class, 'index'])->name('areas.index');
         Route::get('areas/create', [\App\Http\Controllers\Admin\AreaController::class, 'create'])->name('areas.create')->middleware('role:admin');
         Route::post('areas', [\App\Http\Controllers\Admin\AreaController::class, 'store'])->name('areas.store')->middleware('role:admin');
@@ -168,8 +169,8 @@ Route::middleware('auth')->group(function () {
         Route::put('areas/{area}', [\App\Http\Controllers\Admin\AreaController::class, 'update'])->name('areas.update')->middleware('role:admin');
         Route::delete('areas/{area}', [\App\Http\Controllers\Admin\AreaController::class, 'destroy'])->name('areas.destroy')->middleware('role:admin');
 
+        // Secciones por Área
         Route::prefix('areas/{area}/secciones')->name('areas.secciones.')->middleware('area.access')->group(function () {
->>>>>>> origin/main
             Route::get('/', [\App\Http\Controllers\Admin\SeccionController::class, 'index'])->name('index');
             Route::get('/crear', [\App\Http\Controllers\Admin\SeccionController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Admin\SeccionController::class, 'store'])->name('store');
@@ -178,25 +179,19 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{seccion}', [\App\Http\Controllers\Admin\SeccionController::class, 'destroy'])->name('destroy');
         });
 
-<<<<<<< HEAD
-        Route::prefix('areas/{area}/documentos')->name('areas.documentos.')->group(function () {
-=======
+        // Documentos por Área
         Route::prefix('areas/{area}/documentos')->name('areas.documentos.')->middleware('area.access')->group(function () {
->>>>>>> origin/main
             Route::get('/', [\App\Http\Controllers\Admin\DocumentoController::class, 'index'])->name('index');
             Route::get('/crear', [\App\Http\Controllers\Admin\DocumentoController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Admin\DocumentoController::class, 'store'])->name('store');
             Route::get('/{documento}/editar', [\App\Http\Controllers\Admin\DocumentoController::class, 'edit'])->name('edit');
             Route::put('/{documento}', [\App\Http\Controllers\Admin\DocumentoController::class, 'update'])->name('update');
             Route::delete('/{documento}', [\App\Http\Controllers\Admin\DocumentoController::class, 'destroy'])->name('destroy');
-<<<<<<< HEAD
-        });
-=======
             Route::get('/{documento}/vista-previa', [\App\Http\Controllers\Admin\DocumentoController::class, 'preview'])->name('preview');
         });
 
+        // Gestión de Usuarios (Solo Administrador)
         Route::resource('usuarios', \App\Http\Controllers\Admin\UsuarioController::class)->middleware('role:admin');
->>>>>>> origin/main
     });
 });
 
