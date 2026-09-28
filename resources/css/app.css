@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import "tailwindcss";
 
 @layer base {
@@ -48,3 +49,8 @@
     --color-conalep-gold: #C59B27;    /* Beige/Dorado Institucional */
     --color-conalep-surface: #F8FAFC; /* Gris muy claro/Superficie */
 }
+=======
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+>>>>>>> origin/main

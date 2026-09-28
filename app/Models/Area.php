@@ -30,4 +30,12 @@ class Area extends Model
     {
         return $this->belongsToMany(\App\Models\User::class, 'user_areas');
     }
+<<<<<<< HEAD
+=======
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+>>>>>>> origin/main
 }

@@ -7,6 +7,7 @@ export default {
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
+        './resources/js/**/*.js',
     ],
 
     theme: {
@@ -25,9 +26,15 @@ export default {
                     magenta: '#E80A4D',  // Magenta institucional
                     wine: '#A12244',     // Vino / borgoña
                     light: '#F3F2F3',    // Gris claro de fondo
+                    primary: '#00664f', // Verde principal
+                    dark: '#004d3b',    // Verde oscuro para hover/bordes
+                    light: '#f0fdf4',   // Fondo claro (green-50)
                 }
             }
         },
     },
+    plugins: [forms],
+};
+
     plugins: [forms],
 };
