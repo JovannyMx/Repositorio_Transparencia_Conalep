@@ -1,47 +1,51 @@
 @extends('layouts.public')
 
-@section('title', $area['nombre'] . ' - Repositorio de Transparencia')
+@section('title', $area['nombre'] . ' - CONALEP Jalisco')
 
 @section('content')
 
-    <!-- Navegación tipo Miga de Pan (Breadcrumbs) -->
-    <nav class="flex mb-6 text-sm text-gray-500">
-        <a href="{{ url('/') }}" class="hover:text-blue-900 transition">&larr; Volver a Áreas</a>
-        <span class="mx-2">/</span>
-        <span class="text-gray-800 font-medium">{{ $area['nombre'] }}</span>
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6 text-xs font-medium text-slate-500 items-center gap-1.5">
+        <a href="{{ route('home') }}" class="hover:text-conalep-green transition flex items-center gap-1">
+            &larr; Volver a Áreas
+        </a>
+        <span class="text-slate-300">/</span>
+        <span class="text-conalep-dark font-bold">{{ $area['nombre'] }}</span>
     </nav>
 
     <!-- Encabezado del Área -->
-    <header class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
-        <h1 class="text-2xl font-bold text-blue-900 mb-2">{{ $area['nombre'] }}</h1>
-        <p class="text-gray-600">{{ $area['descripcion'] }}</p>
+    <header class="bg-white p-6 sm:p-8 rounded-xl shadow-sm border-l-4 border-l-conalep-green border border-slate-200 mb-6 relative overflow-hidden">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-conalep-dark mb-2">
+            {{ $area['nombre'] }}
+        </h1>
+        <p class="text-slate-600 text-sm leading-relaxed max-w-4xl">
+            {{ $area['descripcion'] }}
+        </p>
     </header>
 
-    <!-- Controles de Filtro y Búsqueda (RF-05 / RF-07) -->
-    <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+    <!-- Filtro y Buscador JS -->
+    <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             
-            <!-- Buscador por texto -->
             <div class="md:col-span-2">
-                <label for="input-busqueda" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                <label for="input-busqueda" class="block text-xs font-bold text-conalep-dark uppercase tracking-wider mb-2">
                     Buscar por nombre de documento
                 </label>
                 <input 
                     type="text" 
                     id="input-busqueda" 
-                    placeholder="Escribe para filtrar (ej. Organigrama, Tabulador)..." 
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition"
+                    placeholder="Escribe para filtrar en tiempo real..." 
+                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-conalep-green focus:border-conalep-green text-sm transition placeholder-slate-400 text-slate-800"
                 >
             </div>
 
-            <!-- Filtro por Categoría -->
             <div>
-                <label for="select-categoria" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                <label for="select-categoria" class="block text-xs font-bold text-conalep-dark uppercase tracking-wider mb-2">
                     Filtrar por Categoría
                 </label>
                 <select 
                     id="select-categoria" 
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition bg-white"
+                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-conalep-green focus:border-conalep-green text-sm transition bg-white text-slate-800"
                 >
                     <option value="">Todas las categorías</option>
                     <option value="Estructura Orgánica">Estructura Orgánica</option>
@@ -53,52 +57,55 @@
         </div>
     </section>
 
-    <!-- Tabla de Documentos de Transparencia (RF-02, RF-03, RF-06) -->
-    <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <h2 class="text-lg font-bold text-gray-900">Documentos Publicados</h2>
-            <span id="contador-resultados" class="text-xs bg-blue-50 text-blue-800 font-semibold px-3 py-1 rounded-full">
-                Mostrando {{ count($documentos) }} documento(s)
+    <!-- Tabla de Documentos -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+            <h2 class="text-base font-bold text-conalep-dark flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-conalep-green"></span>
+                Documentos Disponibles
+            </h2>
+            <span id="contador-resultados" class="text-xs bg-conalep-light text-conalep-dark font-bold px-3 py-1 rounded-full border border-conalep-mint/40">
+                Mostrando {{ count($documentos ?? []) }} documento(s)
             </span>
         </div>
 
-        <!-- Tabla Responsiva -->
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="tabla-documentos">
                 <thead>
-                    <tr class="bg-gray-50 text-gray-600 text-xs font-semibold uppercase tracking-wider border-b border-gray-200">
-                        <th class="py-3 px-6">Documento</th>
-                        <th class="py-3 px-6">Categoría</th>
-                        <th class="py-3 px-6">Fecha</th>
-                        <th class="py-3 px-6">Formato / Peso</th>
-                        <th class="py-3 px-6 text-right">Acción</th>
+                    <tr class="bg-conalep-light text-conalep-dark text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                        <th class="py-3.5 px-6">Documento</th>
+                        <th class="py-3.5 px-6">Categoría</th>
+                        <th class="py-3.5 px-6">Fecha</th>
+                        <th class="py-3.5 px-6">Formato / Peso</th>
+                        <th class="py-3.5 px-6 text-right">Acción</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 text-sm">
-                    @forelse ($documentos as $doc)
+                <tbody class="divide-y divide-slate-200 text-sm">
+                    @forelse ($documentos ?? [] as $doc)
                         <tr 
-                            class="fila-documento hover:bg-gray-50 transition"
+                            class="fila-documento hover:bg-conalep-light/40 transition-colors"
                             data-nombre="{{ strtolower($doc['nombre']) }}"
                             data-categoria="{{ $doc['categoria'] }}"
                         >
-                            <td class="py-4 px-6 font-medium text-gray-900 col-nombre">
+                            <td class="py-4 px-6 font-semibold text-slate-800 col-nombre">
                                 {{ $doc['nombre'] }}
                             </td>
-                            <td class="py-4 px-6 text-gray-500">
-                                <span class="bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-0.5 rounded">
+                            <td class="py-4 px-6 text-slate-600">
+                                <span class="bg-slate-100 text-conalep-dark text-xs font-semibold px-2.5 py-1 rounded border border-slate-200">
                                     {{ $doc['categoria'] }}
                                 </span>
                             </td>
-                            <td class="py-4 px-6 text-gray-500 whitespace-nowrap">
+                            <td class="py-4 px-6 text-slate-500 whitespace-nowrap text-xs">
                                 {{ $doc['fecha_publicacion'] }}
                             </td>
-                            <td class="py-4 px-6 text-gray-500 whitespace-nowrap">
-                                <span class="font-semibold text-red-600">{{ $doc['formato'] }}</span> ({{ $doc['tamaño'] }})
+                            <td class="py-4 px-6 text-slate-500 whitespace-nowrap text-xs">
+                                <span class="font-bold text-conalep-magenta">{{ $doc['formato'] }}</span> ({{$doc['tamaño'] }})
                             </td>
                             <td class="py-4 px-6 text-right whitespace-nowrap">
                                 <a 
                                     href="{{ $doc['url'] }}" 
-                                    class="inline-flex items-center gap-1 text-sm bg-blue-900 hover:bg-blue-800 text-white font-medium px-3 py-1.5 rounded transition shadow-sm"
+                                    target="_blank"
+                                    class="inline-flex items-center gap-1 text-xs bg-conalep-green hover:bg-conalep-dark text-white font-bold px-4 py-2 rounded-lg transition shadow-sm"
                                 >
                                     Descargar
                                 </a>
@@ -106,15 +113,14 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-6 px-6 text-center text-gray-500">
+                            <td colspan="5" class="py-8 px-6 text-center text-slate-500 text-sm">
                                 No se encontraron documentos registrados en esta área.
                             </td>
                         </tr>
                     @endforelse
 
-                    <!-- Mensaje cuando la búsqueda no arroje coincidencias -->
                     <tr id="sin-coincidencias" class="hidden">
-                        <td colspan="5" class="py-8 px-6 text-center text-gray-500">
+                        <td colspan="5" class="py-8 px-6 text-center text-slate-500 text-sm">
                             No se encontraron documentos que coincidan con la búsqueda o filtro seleccionado.
                         </td>
                     </tr>
@@ -123,7 +129,7 @@
         </div>
     </section>
 
-    <!-- Script de Filtrado en Tiempo Real -->
+    <!-- Script de Búsqueda y Filtrado en Tiempo Real -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const inputBusqueda = document.getElementById('input-busqueda');
@@ -152,18 +158,15 @@
                     }
                 });
 
-                // Mostrar u ocultar mensaje de "sin resultados"
                 if (visibles === 0 && filas.length > 0) {
                     mensajeVacio.classList.remove('hidden');
                 } else {
                     mensajeVacio.classList.add('hidden');
                 }
 
-                // Actualizar el contador dinámico
                 contador.textContent = `Mostrando ${visibles} documento(s)`;
             }
 
-            // Escuchar eventos en los controles
             inputBusqueda.addEventListener('input', filtrar);
             selectCategoria.addEventListener('change', filtrar);
         });

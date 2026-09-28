@@ -14,8 +14,20 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                conalep: {
+                    green: '#007D69',    // Verde institucional principal
+                    dark: '#004D40',     // Verde oscuro
+                    secondary: '#1F7E6D',// Verde secundario
+                    mint: '#80C3AF',     // Verde claro / menta
+                    orange: '#FD8204',   // Naranja acento
+                    gold: '#B48E5C',     // Dorado / beige
+                    magenta: '#E80A4D',  // Magenta institucional
+                    wine: '#A12244',     // Vino / borgoña
+                    light: '#F3F2F3',    // Gris claro de fondo
+                }
+            }
         },
     },
-
     plugins: [forms],
 };

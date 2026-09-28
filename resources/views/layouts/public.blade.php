@@ -3,42 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Repositorio de Transparencia - Dirección de Administración')</title>
-
-    <!-- Compilación de Tailwind CSS y JS con Vite -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <title>@yield('title', 'Portal de Transparencia - CONALEP Jalisco')</title>
+    
+    <!-- CDN de Tailwind CSS con paleta institucional y fuente de respaldo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'garet': ['Garet', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                    colors: {
+                        'conalep-green': '#007D69',
+                        'conalep-dark': '#004D40',
+                        'conalep-light': '#E6F2F0',
+                        'conalep-mint': '#A2D5C6',
+                        'conalep-magenta': '#C20E4D',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-100 min-h-screen text-gray-800 font-sans flex flex-col justify-between">
+<body class="bg-slate-100 text-slate-800 flex flex-col min-h-screen font-garet antialiased">
 
-    <!-- Encabezado / Header General -->
-    <header class="bg-blue-900 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <a href="{{ url('/') }}" class="text-2xl font-bold hover:text-blue-200 transition">
-                    Repositorio de Transparencia
+    <!-- Header / Barra de Navegación -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="{{ route('home') }}" class="flex items-center gap-3.5 group">
+                <img 
+                    src="{{ asset('images/Conalep-logo.png') }}" 
+                    alt="Logo CONALEP Jalisco" 
+                    class="h-12 w-auto object-contain"
+                >
+                <div class="border-l border-slate-200 pl-3">
+                    <span class="block font-extrabold text-conalep-dark leading-none text-base group-hover:text-conalep-green transition-colors">
+                        Jalisco
+                    </span>
+                    <span class="text-xs text-conalep-green font-semibold tracking-tight">
+                        Portal de Transparencia
+                    </span>
+                </div>
+            </a>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-700">
+                <a href="{{ route('home') }}" class="hover:text-conalep-green transition py-1 border-b-2 border-transparent hover:border-conalep-green">
+                    Áreas Generadoras
                 </a>
-                <p class="text-sm text-blue-200">Dirección de Administración — CONALEP Jalisco</p>
-            </div>
-            
-            <!-- Botón de Acceso Administrativo -->
-            <div>
-                <a href="{{ route('login') }}" class="text-sm bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition font-medium">
-                    Acceso Administrativo
+                <a href="{{ route('contacto.public') }}" class="hover:text-conalep-green transition py-1 border-b-2 border-transparent hover:border-conalep-green">
+                    Unidad de Transparencia
                 </a>
-            </div>
+            </nav>
         </div>
     </header>
 
-    <!-- Contenido Dinámico inyectado desde cada vista -->
-    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+    <!-- Contenido dinámico -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         @yield('content')
     </main>
 
-    <!-- Pie de Página / Footer General -->
-    <footer class="bg-gray-800 text-gray-300 py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
-            <p>&copy; {{ date('Y') }} Dirección de Administración — Todos los derechos reservados.</p>
-            <p class="text-xs text-gray-500 mt-1">Sistema de Repositorio Institucional de Transparencia</p>
+    <!-- Footer Institucional -->
+    <footer class="bg-conalep-dark text-white border-t-4 border-conalep-green py-8 mt-12 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <div>
+                <p class="font-bold text-sm text-white">
+                    Colegio de Educación Profesional Técnica del Estado de Jalisco
+                </p>
+                <p class="text-conalep-mint mt-1">
+                    Cumplimiento con la Ley de Transparencia y Acceso a la Información Pública del Estado de Jalisco.
+                </p>
+            </div>
+            <div class="text-slate-300">
+                &copy; {{ date('Y') }} <span class="font-bold text-white">CONALEP Jalisco</span>. Todos los derechos reservados.
+            </div>
         </div>
     </footer>
 
