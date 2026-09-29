@@ -7,12 +7,19 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+<<<<<<< HEAD
+=======
 use Spatie\Permission\Traits\HasRoles;
+>>>>>>> origin/main
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
+<<<<<<< HEAD
+    use HasFactory, Notifiable;
+=======
     use HasFactory, Notifiable, HasRoles;
+>>>>>>> origin/main
 
     /**
      * The attributes that are mass assignable.
@@ -52,4 +59,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(\App\Models\Area::class, 'user_areas');
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/main
