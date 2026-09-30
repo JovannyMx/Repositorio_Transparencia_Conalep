@@ -17,74 +17,75 @@
     <div class="py-12 bg-gray-50 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
-            <!-- Mensaje de éxito de la versión original -->
+            <!-- Mensaje de éxito -->
             @if (session('success'))
                 <div class="mb-6 bg-green-100 border-l-4 border-[#00664f] text-green-800 px-4 py-3 rounded-md shadow-sm">
                     {{ session('success') }}
                 </div>
             @endif
 
-
-            <div class="bg-white shadow rounded-lg overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orden</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Slug</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activo</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @forelse ($areas as $area)
-                            <tr>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $area->orden }}</td>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $area->nombre }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $area->slug }}</td>
-                            
-                            <!-- Slug integrado del original -->
-                            <p class="text-xs text-gray-400 mb-4 pl-3 font-mono">Slug: {{ $area->slug }}</p>
-                        </div>
+            <!-- Contenedor Grid (Reemplaza a la etiqueta table) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                
+                @forelse ($areas as $area)
+                    <!-- Estructura de la Tarjeta (Card) -->
+                    <div class="bg-white rounded-2xl shadow-sm border-l-4 border-[#00664f] p-6 flex flex-col">
                         
-                        <div class="flex flex-col gap-3 mt-4">
-                            <!-- Enlaces a Secciones y Documentos (Rejilla de 2 columnas) -->
-                            <div class="grid grid-cols-2 gap-2">
-                                <a href="{{ route('admin.areas.secciones.index', $area) }}" 
-                                   class="text-center bg-gray-50 text-gray-700 border border-gray-200 px-3 py-2 rounded-lg text-sm font-bold hover:bg-gray-100 hover:text-[#00664f] hover:border-[#00664f] transition-all">
-                                    Secciones
-                                </a>
-                                <a href="{{ route('admin.areas.documentos.index', $area) }}" 
-                                   class="text-center bg-gray-50 text-gray-700 border border-gray-200 px-3 py-2 rounded-lg text-sm font-bold hover:bg-gray-100 hover:text-[#00664f] hover:border-[#00664f] transition-all">
-                                    Documentos
-                                </a>
-                            </div>
+                        <!-- Título -->
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ $area->nombre }}</h3>
 
-                            <!-- Acciones de Edición/Eliminación solo para Admins -->
-                            @role('admin')
-                                <div class="flex justify-end gap-2 border-t border-gray-50 pt-4 mt-2">
-                                    <a href="{{ route('admin.areas.edit', $area) }}" 
-                                       class="text-[#00664f] bg-green-50 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#00664f] hover:text-white transition-colors">
-                                        Editar
-                                    </a>
-
-                                    <form action="{{ route('admin.areas.destroy', $area) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('¿Eliminar esta área? Esto también eliminará sus secciones y documentos.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 bg-red-50 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600 hover:text-white transition-colors">
-                                            Eliminar
-                                        </button>
-                                    </form>
-                                </div>
-                            @endrole
+                        <!-- Indicadores (Activo y Orden) -->
+                        <div class="flex items-center gap-3 mb-4 text-xs">
+                            @if($area->activo)
+                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded font-medium">Activo</span>
+                            @else
+                                <span class="bg-red-100 text-red-700 px-2 py-1 rounded font-medium">Inactivo</span>
+                            @endif
+                            <span class="text-[#00664f] font-medium">Orden: {{ $area->orden }}</span>
                         </div>
+
+                        <!-- Slug -->
+                        <p class="text-gray-400 text-xs mb-6 font-mono">Slug: {{ $area->slug }}</p>
+
+                        <!-- Botones Intermedios (Secciones y Documentos) -->
+                        <div class="flex gap-3 mb-6">
+                            <a href="{{ route('admin.areas.secciones.index', $area) }}" 
+                               class="flex-1 text-center bg-gray-50 border border-gray-100 rounded-lg py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                                Secciones
+                            </a>
+                            <a href="{{ route('admin.areas.documentos.index', $area) }}" 
+                               class="flex-1 text-center bg-gray-50 border border-gray-100 rounded-lg py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                                Documentos
+                            </a>
+                        </div>
+
+                        <!-- Acciones de Edición/Eliminación solo para Admins -->
+                        @role('admin')
+                        <div class="flex justify-center gap-3 mt-auto pt-2">
+                            <a href="{{ route('admin.areas.edit', $area) }}" 
+                               class="text-sm font-medium text-green-600 bg-green-50 px-6 py-1.5 rounded-lg hover:bg-green-100 transition-colors">
+                                Editar
+                            </a>
+                            <form action="{{ route('admin.areas.destroy', $area) }}" method="POST" class="inline-block" 
+                                  onsubmit="return confirm('¿Eliminar esta área? Esto también eliminará sus secciones y documentos.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" 
+                                        class="text-sm font-medium text-red-600 bg-red-50 px-6 py-1.5 rounded-lg hover:bg-red-100 transition-colors">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                        @endrole
+                        
                     </div>
                 @empty
+                    <!-- Estado Vacío -->
                     <div class="col-span-full bg-white rounded-2xl p-10 text-center border border-dashed border-gray-300">
                         <p class="text-gray-500 text-lg">No hay áreas registradas todavía.</p>
                     </div>
                 @endforelse
+
             </div>
         </div>
     </div>
