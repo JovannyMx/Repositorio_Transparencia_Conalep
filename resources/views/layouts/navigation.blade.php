@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-conalep-primary border-b border-conalep-dark shadow-lg">
+<nav x-data="{ open: false }" class="bg-[#00664f] border-b border-[#004d3b] shadow-lg">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
@@ -56,7 +56,7 @@
                 <x-dropdown align="right" width="48">
 
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-conalep-primary bg-white hover:text-conalep-dark focus:outline-none transition ease-in-out duration-150 shadow-sm">
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-[#00664f] bg-white hover:text-[#004d3b] focus:outline-none transition ease-in-out duration-150 shadow-sm">
 
                             <div>
                                 {{ Auth::user()->name ?? 'Usuario' }}
@@ -106,7 +106,7 @@
 
                 <button
                     @click="open = ! open"
-                    class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-200 hover:bg-conalep-dark focus:outline-none focus:bg-conalep-dark focus:text-white transition duration-150 ease-in-out"
+                    class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-200 hover:bg-[#004d3b] focus:outline-none focus:bg-[#004d3b] focus:text-white transition duration-150 ease-in-out"
                 >
 
                     <svg class="h-6 w-6"
@@ -144,7 +144,7 @@
     <!-- Responsive Navigation Menu -->
     <div
         :class="{'block': open, 'hidden': ! open}"
-        class="hidden sm:hidden bg-conalep-dark"
+        class="hidden sm:hidden bg-[#004d3b]"
     >
 
         <div class="pt-2 pb-3 space-y-1">
