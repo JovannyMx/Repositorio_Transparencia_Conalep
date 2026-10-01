@@ -9,19 +9,6 @@ use Illuminate\Support\Str;
 
 class AreaController extends Controller
 {
-<<<<<<< HEAD
-   public function index()
-    {
-    $user = auth()->user();
-
-    if ($user->hasRole('admin')) {
-        $areas = Area::orderBy('orden')->get();
-    } else {
-        $areas = $user->areas()->orderBy('orden')->get();
-    }
-
-    return view('admin.areas.index', compact('areas'));
-=======
     public function index()
     {
         $user = auth()->user();
@@ -33,7 +20,6 @@ class AreaController extends Controller
         }
 
         return view('admin.areas.index', compact('areas'));
->>>>>>> feature/frontend-sitio-publico
     }
 
     public function create()
