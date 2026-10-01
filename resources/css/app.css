@@ -1,7 +1,9 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
-    /* Carga local de la tipografía Garet si existen los archivos en public/fonts/ */
+    /* Carga local de la tipografía Garet */
     @font-face {
         font-family: 'Garet';
         src: url('/fonts/Garet-Book.woff2') format('woff2'),
@@ -35,18 +37,3 @@
         font-display: swap;
     }
 }
-
-@theme {
-    /* Familias tipográficas */
-    --font-garet: 'Garet', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-    /* Paleta Oficial CONALEP Jalisco 2025 */
-    --color-conalep-green: #007E67;   /* Pantone 335 C - Verde Principal */
-    --color-conalep-dark: #004040;    /* Verde Oscuro Institucional */
-    --color-conalep-mint: #E3F2ED;    /* Verde Menta Claro para fondos/badges */
-    --color-conalep-orange: #E66A20;  /* Naranja Institucional (Acento/Énfasis) */
-    --color-conalep-gold: #C59B27;    /* Beige/Dorado Institucional */
-    --color-conalep-surface: #F8FAFC; /* Gris muy claro/Superficie */
-}
-
-
