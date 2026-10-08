@@ -15,13 +15,14 @@ class Documento extends Model implements HasMedia
     protected $fillable = [
         'area_id', 'seccion_id', 'nombre', 'archivo_path', 'extension',
         'tamano', 'liga_publica', 'orden', 'fecha_publicacion',
-        'fecha_actualizacion', 'activo',
+        'fecha_actualizacion', 'activo', 'fecha_vencimiento',
     ];
 
     protected $casts = [
         'activo' => 'boolean',
         'fecha_publicacion' => 'date',
         'fecha_actualizacion' => 'date',
+        'fecha_vencimiento' => 'date',
     ];
 
     protected static function boot()

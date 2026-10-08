@@ -96,8 +96,7 @@
                                 Editar
                             </a>
                             
-                            <form action="{{ route('admin.areas.destroy', $area) }}" method="POST" class="inline-block" 
-                                  onsubmit="return confirm('¿Eliminar esta área? Esto también eliminará permanentemente sus secciones y documentos.');">
+                           <form action="{{ route('admin.areas.destroy', $area) }}" method="POST" class="inline-block form-eliminar">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="inline-flex items-center text-xs font-bold text-slate-400 hover:text-red-500 transition-colors p-1" title="Eliminar área">

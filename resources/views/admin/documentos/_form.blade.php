@@ -37,9 +37,20 @@
     </div>
 
     <div>
+        <label class="block text-sm font-medium text-gray-700">Fecha de vencimiento (opcional)</label>
+        <p class="text-[11px] text-gray-500 mb-1">Si estableces una fecha, el documento se eliminará automáticamente al llegar el día.</p>
+        <input type="date" name="fecha_vencimiento"
+               value="{{ old('fecha_vencimiento', isset($documento) && $documento->fecha_vencimiento ? $documento->fecha_vencimiento->format('Y-m-d') : '') }}"
+               class="mt-1 block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        @error('fecha_vencimiento')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div>
         <label class="block text-sm font-medium text-gray-700">Orden de despliegue</label>
-        <input type="number" name="orden" value="{{ old('orden', $documento->orden ?? 0) }}" min="0"
-               class="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <input type="number" name="orden" value="{{ old('orden', $documento->orden ?? $nextOrden ?? 1) }}" min="0"
+               class="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
         @error('orden')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
@@ -47,7 +58,7 @@
 
     <div>
         <label class="block text-sm font-medium text-gray-700">
-            Archivo (PDF, Word o Excel — máx. 10 MB)
+            Archivo (PDF, Word o Excel — máx. 50 MB)
             @if ($documento && $documento->getFirstMediaUrl('archivo'))
                 <span class="text-xs text-gray-400">— deja vacío para conservar el archivo actual</span>
             @endif

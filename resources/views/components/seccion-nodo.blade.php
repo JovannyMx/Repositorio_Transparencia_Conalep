@@ -13,8 +13,7 @@
         <div class="space-x-3 text-sm">
             <a href="{{ route('admin.areas.secciones.edit', [$area, $seccion]) }}"
                class="text-indigo-600 hover:text-indigo-900">Editar</a>
-            <form action="{{ route('admin.areas.secciones.destroy', [$area, $seccion]) }}" method="POST" class="inline"
-                  onsubmit="return confirm('¿Eliminar esta sección? Se eliminarán también sus subsecciones y documentos.');">
+            <form action="{{ route('admin.areas.secciones.destroy', [$area, $seccion]) }}" method="POST" class="inline form-eliminar">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>

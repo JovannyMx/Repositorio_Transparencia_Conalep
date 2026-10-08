@@ -55,6 +55,8 @@
                                 <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Sección</th>
                                 <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tipo</th>
                                 <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Fecha</th>
+                                <!-- Nueva columna para la fecha de vencimiento -->
+                                <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Vencimiento</th>
                                 <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Liga</th>
                                 <th scope="col" class="px-6 py-4 text-right text-[11px] font-bold text-slate-500 uppercase tracking-wider">Acciones</th>
                             </tr>
@@ -66,19 +68,9 @@
                                     
                                     <!-- Controles Visuales de Ordenamiento -->
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-slate-300 cursor-move hover:text-conalep-primary transition-colors" title="Arrastrar para reordenar">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
-                                            </span>
-                                            <div class="flex flex-col">
-                                                <button class="text-slate-400 hover:text-conalep-primary transition-colors p-0.5" title="Subir posición">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7"></path></svg>
-                                                </button>
-                                                <button class="text-slate-400 hover:text-conalep-primary transition-colors p-0.5" title="Bajar posición">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <span class="text-sm font-bold text-slate-700">
+                                            {{ $documento->orden }}
+                                        </span>
                                     </td>
 
                                     <!-- Nombre -->
@@ -104,9 +96,20 @@
                                         </span>
                                     </td>
                                     
-                                    <!-- Fecha -->
+                                    <!-- Fecha de publicación -->
                                     <td class="px-6 py-4 text-sm text-slate-500 font-medium">
                                         {{ $documento->fecha_publicacion?->format('d/m/Y') }}
+                                    </td>
+                                    
+                                    <!-- NUEVO: Fecha de vencimiento -->
+                                    <td class="px-6 py-4 text-sm">
+                                        @if($documento->fecha_vencimiento)
+                                            <span class="text-slate-600 font-medium">
+                                                {{ $documento->fecha_vencimiento->format('d/m/Y') }}
+                                            </span>
+                                        @else
+                                            <span class="text-slate-400 italic text-xs">Sin fecha</span>
+                                        @endif
                                     </td>
                                     
                                     <!-- Liga del Archivo -->
@@ -132,8 +135,7 @@
                                                class="text-slate-400 hover:text-conalep-primary transition-colors" title="Editar">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                             </a>
-                                            <form action="{{ route('admin.areas.documentos.destroy', [$area, $documento]) }}" method="POST" class="inline"
-                                                  onsubmit="return confirm('¿Estás seguro de eliminar este documento? Esta acción no se puede deshacer.');">
+                                            <form action="{{ route('admin.areas.documentos.destroy', [$area, $documento]) }}" method="POST" class="inline form-eliminar">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-slate-400 hover:text-red-500 transition-colors" title="Eliminar">
@@ -144,9 +146,9 @@
                                     </td>
                                 </tr>
                             @empty
-                                <!-- Estado Vacío Mejorado -->
+                                <!-- Estado Vacío Mejorado (Se actualizó colspan de 7 a 8) -->
                                 <tr>
-                                    <td colspan="7" class="px-6 py-16 text-center">
+                                    <td colspan="8" class="px-6 py-16 text-center">
                                         <div class="flex flex-col items-center justify-center">
                                             <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center shadow-sm mb-4 text-slate-400 border border-slate-100">
                                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -169,7 +171,7 @@
         </div>
     </div>
 
-    <!-- Script para habilitar Drag & Drop -->
+    <!-- Script para habilitar Drag & Drop (Opcional: Si ya no usarás la función de arrastrar, puedes borrar toda esta etiqueta <script>) -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -177,36 +179,13 @@
             
             if (tabla) {
                 Sortable.create(tabla, {
-                    handle: '.cursor-move', // Solo permite arrastrar si el usuario toma el ícono
-                    animation: 150,         // Animación fluida al mover
-                    ghostClass: 'bg-conalep-primary/10', // Color de fondo institucional mientras se arrastra
+                    handle: '.cursor-move',
+                    animation: 150,
+                    ghostClass: 'bg-conalep-primary/10',
                     
-                    // Esta función se ejecuta cuando el usuario suelta la fila
                     onEnd: function (evt) {
-                        // Creamos un array con el nuevo orden de los IDs
                         const ordenNuevo = Array.from(tabla.children).map(fila => fila.dataset.id);
-                        
                         console.log("El nuevo orden de IDs es:", ordenNuevo);
-
-                        // AQUÍ COMIENZA LA CONEXIÓN CON EL BACKEND
-                        // Erick ya esta el array listo para enviar.
-                        // Cuando él tenga la ruta lista, descomentaré este código:
-                        
-                        /*
-                        fetch('/admin/areas/{{ $area->id }}/documentos/reordenar', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}' // Token de seguridad de Laravel
-                            },
-                            body: JSON.stringify({ orden: ordenNuevo })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            // Mostrar alerta de éxito usando una librería como Toastr o SweetAlert
-                            console.log('Orden guardado con éxito');
-                        });
-                        */
                     }
                 });
             }

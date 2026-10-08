@@ -32,5 +32,43 @@
                 {{ $slot }}
             </main>
         </div>
+
+        <!-- Librería SweetAlert2 Global -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <!-- Script Global para Confirmación de Eliminación -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Usamos delegación de eventos para capturar cualquier envío de formulario en todo el sistema
+                document.body.addEventListener('submit', function (e) {
+                    
+                    // Verificamos si el formulario que se está enviando tiene la clase 'form-eliminar'
+                    if (e.target && e.target.classList.contains('form-eliminar')) {
+                        e.preventDefault(); // Detenemos el envío inmediato
+                        
+                        const form = e.target;
+
+                        Swal.fire({
+                            title: '¿Estás seguro?',
+                            text: "Esta acción eliminará el registro de forma permanente y no se puede deshacer.",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#ef4444', // Tailwind red-500
+                            cancelButtonColor: '#64748b',  // Tailwind slate-500
+                            confirmButtonText: 'Sí, eliminar',
+                            cancelButtonText: 'Cancelar',
+                            customClass: {
+                                popup: 'rounded-2xl',
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Si el usuario confirma, enviamos el formulario
+                                form.submit();
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

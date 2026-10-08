@@ -92,8 +92,8 @@
                                             </a>
                                             
                                             @if ($usuario->id !== auth()->id())
-                                                <form action="{{ route('admin.usuarios.destroy', $usuario) }}" method="POST" class="inline"
-                                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">
+                                                <!-- Formulario actualizado con la clase form-eliminar -->
+                                                <form action="{{ route('admin.usuarios.destroy', $usuario) }}" method="POST" class="inline form-eliminar">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Eliminar usuario">

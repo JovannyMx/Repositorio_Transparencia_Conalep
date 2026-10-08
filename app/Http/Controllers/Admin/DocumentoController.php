@@ -12,7 +12,7 @@ class DocumentoController extends Controller
 {
     public function index(Area $area)
     {
-        $documentos = $area->documentos()->with('seccion')->get();
+        $documentos = $area->documentos()->with('seccion')->orderBy('orden')->get();
 
         return view('admin.documentos.index', compact('area', 'documentos'));
     }
@@ -20,8 +20,11 @@ class DocumentoController extends Controller
     public function create(Area $area)
     {
         $secciones = Seccion::where('area_id', $area->id)->orderBy('nombre')->get();
+        
+        // Calcular el siguiente número de orden (el máximo actual + 1)
+        $nextOrden = $area->documentos()->max('orden') + 1;
 
-        return view('admin.documentos.create', compact('area', 'secciones'));
+        return view('admin.documentos.create', compact('area', 'secciones', 'nextOrden'));
     }
 
     public function store(Request $request, Area $area)
@@ -31,6 +34,7 @@ class DocumentoController extends Controller
             'seccion_id' => 'nullable|exists:secciones,id',
             'orden' => 'nullable|integer|min:0',
             'fecha_publicacion' => 'nullable|date',
+            'fecha_vencimiento' => 'nullable|date|after_or_equal:today',
             'archivo' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:51200', // 50 MB máx
         ]);
 
@@ -40,6 +44,7 @@ class DocumentoController extends Controller
             'nombre' => $validated['nombre'],
             'orden' => $validated['orden'] ?? 0,
             'fecha_publicacion' => $validated['fecha_publicacion'] ?? now(),
+            'fecha_vencimiento' => $validated['fecha_vencimiento'] ?? null,
             'activo' => true,
             'extension' => $request->file('archivo')->getClientOriginalExtension(),
             'tamano' => $request->file('archivo')->getSize(),
@@ -65,8 +70,8 @@ class DocumentoController extends Controller
             'seccion_id' => 'nullable|exists:secciones,id',
             'orden' => 'nullable|integer|min:0',
             'fecha_publicacion' => 'nullable|date',
-            'archivo' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:51200', // se puso para que sea de maximo de 50 megabytes la subida de los archivos por si las moscas
-            
+            'fecha_vencimiento' => 'nullable|date|after_or_equal:today',
+            'archivo' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:51200',
         ]);
 
         $documento->update([
@@ -74,6 +79,7 @@ class DocumentoController extends Controller
             'nombre' => $validated['nombre'],
             'orden' => $validated['orden'] ?? 0,
             'fecha_publicacion' => $validated['fecha_publicacion'] ?? $documento->fecha_publicacion,
+            'fecha_vencimiento' => $validated['fecha_vencimiento'] ?? null,
             'fecha_actualizacion' => now(),
         ]);
 
