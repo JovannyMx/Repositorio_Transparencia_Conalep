@@ -20,7 +20,7 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-xl shadow-conalep-primary/5 rounded-2xl border-t-4 border-conalep-primary p-6 sm:p-8">
                 
-                <form action="{{ route('admin.areas.update', $area) }}" method="POST">
+              <form action="{{ route('admin.areas.update', $area) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     

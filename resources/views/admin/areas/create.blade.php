@@ -16,7 +16,7 @@
                     <p class="text-sm text-gray-500">Ingresa la información para registrar una nueva área en el sistema.</p>
                 </div>
 
-                <form action="{{ route('admin.areas.store') }}" method="POST">
+                <form action="{{ route('admin.areas.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     
                     {{-- Formulario extraído --}}

@@ -13,8 +13,8 @@
                         </svg>
 
                         <span class="text-white font-bold text-xl tracking-wider">
-                            Transparencia
-                            <span class="font-light">CONALEP</span>
+                           Administración
+                            <span class="font-light">CONALEP JALISCO</span>
                         </span>
                     </a>
                 </div>
