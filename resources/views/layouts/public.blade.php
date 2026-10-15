@@ -1,9 +1,19 @@
+{{-- 
+ |--------------------------------------------------------------------------
+ | Layout Público Principal
+ |--------------------------------------------------------------------------
+ | Plantilla base para el portal público de Administración CONALEP Jalisco.
+ | Define la cabecera, navegación, marcas institucionales y pie de página.
+ |
+ | @author Desarrollo - Administración CONALEP Jalisco
+--}}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Portal de Transparencia - CONALEP Jalisco')</title>
+    <title>@yield('title', 'Administración CONALEP Jalisco')</title>
     
     <!-- CDN de Tailwind CSS con paleta institucional y fuente de respaldo -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -39,10 +49,10 @@
                 >
                 <div class="border-l border-slate-200 pl-3">
                     <span class="block font-extrabold text-conalep-dark leading-none text-base group-hover:text-conalep-green transition-colors">
-                        Jalisco
+                        CONALEP Jalisco
                     </span>
                     <span class="text-xs text-conalep-green font-semibold tracking-tight">
-                        Portal de Transparencia
+                        Administración CONALEP Jalisco
                     </span>
                 </div>
             </a>
@@ -71,11 +81,11 @@
                     Colegio de Educación Profesional Técnica del Estado de Jalisco
                 </p>
                 <p class="text-conalep-mint mt-1">
-                    Cumplimiento con la Ley de Transparencia y Acceso a la Información Pública del Estado de Jalisco.
+                    Administración CONALEP Jalisco - Sistema de Consulta y Repositorio Documental Oficial.
                 </p>
             </div>
             <div class="text-slate-300">
-                &copy; {{ date('Y') }} <span class="font-bold text-white">CONALEP Jalisco</span>. Todos los derechos reservados.
+                &copy; {{ date('Y') }} <span class="font-bold text-white">Administración CONALEP Jalisco</span>. Todos los derechos reservados.
             </div>
         </div>
     </footer>

@@ -1,26 +1,27 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Public\AreaController as PublicAreaController;
-use App\Http\Controllers\Public\DocumentoController as PublicDocumentoController;
+use App\Models\Area;
+use App\Models\Documento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 /*
 |--------------------------------------------------------------------------
-| Rutas Públicas (Portal de Transparencia)
+| Rutas Públicas (Administración CONALEP Jalisco - Datos Reales)
 |--------------------------------------------------------------------------
 */
 
 // 1. Portal Principal (Home)
 Route::get('/', function () {
-    // Si la tabla áreas existe en BD, cargamos los datos reales; si no, usamos el fallback
-    if (\Illuminate\Support\Facades\Schema::hasTable('areas')) {
-        $areas = \App\Models\Area::where('activo', true)
-                    ->withCount('documentos')
-                    ->get();
+    if (Schema::hasTable('areas')) {
+        $areas = Area::where('activo', true)
+            ->withCount('documentos')
+            ->orderBy('orden', 'asc')
+            ->get();
     } else {
-        $areas = [];
+        $areas = collect();
     }
 
     return view('welcome', compact('areas'));
@@ -28,41 +29,34 @@ Route::get('/', function () {
 
 // 2. Vista Detallada por Área
 Route::get('/area/{slug}', function ($slug) {
-    $area = \App\Models\Area::where('slug', $slug)
-                ->with(['documentos', 'secciones'])
-                ->firstOrFail();
+    $area = Area::where('slug', $slug)
+        ->where('activo', true)
+        ->with(['secciones', 'documentos' => function ($q) {
+            $q->latest();
+        }])
+        ->firstOrFail();
 
     $documentos = $area->documentos;
 
     return view('area-detalle', compact('area', 'documentos'));
 })->name('areas.public.show');
 
-// 3. Buscador Global Público
+// 3. Buscador Global Público (Consulta Real a BD)
 Route::get('/buscar', function (Request $request) {
-    $query = $request->input('q', '');
+    $query = trim($request->input('q', ''));
 
-    $resultados = [
-        [
-            'id' => 1,
-            'nombre' => 'Presupuesto Anual de Egresos 2026',
-            'area' => 'Finanzas y Contabilidad',
-            'categoria' => 'Presupuestos',
-            'fecha_publicacion' => '05/01/2026',
-            'formato' => 'PDF',
-            'tamaño' => '3.4 MB',
-            'url' => '#',
-        ],
-        [
-            'id' => 2,
-            'nombre' => 'Tabulador de Sueldos y Salarios 2026',
-            'area' => 'Recursos Humanos',
-            'categoria' => 'Remuneraciones',
-            'fecha_publicacion' => '01/02/2026',
-            'formato' => 'PDF',
-            'tamaño' => '850 KB',
-            'url' => '#',
-        ],
-    ];
+    if (!empty($query)) {
+        $resultados = Documento::with('area')
+            ->where(function ($q) use ($query) {
+                $q->where('nombre', 'LIKE', "%{$query}%")
+                  ->orWhere('descripcion', 'LIKE', "%{$query}%")
+                  ->orWhere('categoria', 'LIKE', "%{$query}%");
+            })
+            ->latest()
+            ->get();
+    } else {
+        $resultados = collect();
+    }
 
     return view('buscar-resultados', compact('query', 'resultados'));
 })->name('buscar.public');
