@@ -66,6 +66,27 @@ Route::get('/contacto-transparencia', function () {
     return view('contacto-transparencia');
 })->name('contacto.public');
 
+// 5. Visualización Pública de Documentos (Sin autenticación para iframe/modal)
+Route::get('/documentos/{documento}/ver', function (Documento $documento) {
+    // Si utilizas Spatie Media Library
+    if (method_exists($documento, 'getFirstMedia')) {
+        $media = $documento->getFirstMedia('archivo');
+        if ($media) {
+            return response()->file($media->getPath(), [
+                'Content-Type' => $media->mime_type,
+                'Content-Disposition' => 'inline; filename="' . $media->file_name . '"'
+            ]);
+        }
+    }
+
+    // Alternativa en caso de almacenar el path directamente en la base de datos
+    if (!empty($documento->archivo_path) && file_exists(storage_path('app/public/' . $documento->archivo_path))) {
+        return response()->file(storage_path('app/public/' . $documento->archivo_path));
+    }
+
+    abort(404, 'El archivo solicitado no se encuentra disponible.');
+})->name('documentos.public.ver');
+
 
 /*
 |--------------------------------------------------------------------------

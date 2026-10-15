@@ -93,13 +93,19 @@
                 <tbody class="divide-y divide-slate-200 text-sm">
                     @forelse ($documentos ?? [] as $doc)
                         @php
-                            // Manejo flexible si $doc es un Array o un Objeto Eloquent
+                            $docId = is_array($doc) ? ($doc['id'] ?? null) : ($doc->id ?? null);
                             $docNombre = is_array($doc) ? ($doc['nombre'] ?? $doc['titulo'] ?? '') : ($doc->nombre ?? $doc->titulo ?? '');
                             $docCategoria = is_array($doc) ? ($doc['categoria'] ?? 'General') : ($doc->categoria ?? 'General');
                             $docFecha = is_array($doc) ? ($doc['fecha_publicacion'] ?? '') : ($doc->created_at ? $doc->created_at->format('d/m/Y') : '');
-                            $docFormato = is_array($doc) ? ($doc['formato'] ?? 'PDF') : ($doc->formato ?? 'PDF');
-                            $docTamaño = is_array($doc) ? ($doc['tamaño'] ?? 'N/A') : ($doc->tamaño ?? 'N/A');
-                            $docUrl = is_array($doc) ? ($doc['url'] ?? '#') : (asset('storage/' . $doc->archivo_path));
+                            
+                            // Obtención de datos mediante Spatie Media Library
+                            $media = (is_object($doc) && method_exists($doc, 'getFirstMedia')) ?$doc->getFirstMedia('archivo') : null;
+                            
+                            $docFormato =$media ? pathinfo($media->file_name, PATHINFO_EXTENSION) : (is_array($doc) ? ($doc['formato'] ?? 'PDF') : ($doc->formato ?? 'PDF'));
+                            $docTamaño = $media ? $media->human_readable_size : (is_array($doc) ? ($doc['tamaño'] ?? 'N/A') : ($doc->tamaño ?? 'N/A'));
+                            
+                            // Ruta pública para visualización en modal
+                            $docUrl = $docId ? route('documentos.public.ver', $docId) : '#';
                         @endphp
                         <tr 
                             class="fila-documento hover:bg-conalep-light/40 transition-colors"
@@ -118,7 +124,7 @@
                                 {{ $docFecha }}
                             </td>
                             <td class="py-4 px-6 text-slate-500 whitespace-nowrap text-xs">
-                                <span class="font-bold text-conalep-magenta">{{ $docFormato }}</span> ({{$docTamaño }})
+                                <span class="font-bold text-conalep-magenta">{{ strtoupper($docFormato) }}</span> ({{$docTamaño }})
                             </td>
                             <td class="py-4 px-6 text-right whitespace-nowrap">
                                 <div class="inline-flex items-center gap-2">
@@ -258,7 +264,8 @@
 
             const ext = extension.toLowerCase();
 
-            if (ext === 'pdf' || url.endsWith('.pdf')) {
+            // Detectar visualización por PDF o la URL generada
+            if (ext === 'pdf' || url.includes('/documentos/') || url.endsWith('.pdf')) {
                 pdfFrame.src = url;
                 pdfFrame.classList.remove('hidden');
             } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
