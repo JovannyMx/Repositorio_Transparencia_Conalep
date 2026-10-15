@@ -57,17 +57,30 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             @forelse ($areas as $area)
-                <a 
-                    href="{{ route('areas.public.show', is_array($area) ? $area['slug'] : $area->slug) }}" 
+                @php
+                    // 1) imagen subida desde el formulario  2) trazo SVG antiguo  3) icono por defecto
+                    $iconoUrl = is_array($area) ? null : $area->icono_url;
+                    $iconoPath = is_array($area) ? ($area['icono'] ?? null) : $area->icono_svg_path;
+                    $rutaDefault = 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4';
+                @endphp
+
+                <a
+                    href="{{ route('areas.public.show', is_array($area) ? $area['slug'] : $area->slug) }}"
                     class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-conalep-green hover:shadow-md transition flex flex-col justify-between group"
                 >
                     <div>
                         <div class="flex items-start gap-4 mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-conalep-light flex-shrink-0 flex items-center justify-center text-conalep-green group-hover:bg-conalep-green group-hover:text-white transition-colors">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ is_array($area) ? $area['icono'] : ($area->icono ?? 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4') }}"></path>
-                                </svg>
-                            </div>
+                            @if ($iconoUrl)
+                                <div class="w-12 h-12 rounded-xl bg-conalep-light flex-shrink-0 flex items-center justify-center overflow-hidden p-1.5">
+                                    <img src="{{ $iconoUrl }}" alt="" class="w-full h-full object-contain">
+                                </div>
+                            @else
+                                <div class="w-12 h-12 rounded-xl bg-conalep-light flex-shrink-0 flex items-center justify-center text-conalep-green group-hover:bg-conalep-green group-hover:text-white transition-colors">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconoPath ?? $rutaDefault }}"></path>
+                                    </svg>
+                                </div>
+                            @endif
 
                             <div>
                                 <h3 class="text-lg font-bold text-conalep-dark group-hover:text-conalep-green transition-colors">

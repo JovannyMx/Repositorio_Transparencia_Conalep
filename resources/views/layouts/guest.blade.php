@@ -38,7 +38,7 @@
                 
                 {{-- Títulos --}}
                 <h1 class="text-4xl xl:text-5xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-                    Repositorio de <br> Transparencia
+                    Administración  <br> Conalep Jalisco
                 </h1>
                 
                 <p class="text-base text-emerald-50/70 font-normal leading-relaxed px-4">
