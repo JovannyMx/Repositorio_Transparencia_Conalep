@@ -13,34 +13,6 @@
 @section('title', 'Áreas Generadoras - Administración CONALEP Jalisco')
 
 @section('content')
-
-    <!-- Barra de Acceso de Usuarios (Login / Registro / Dashboard) -->
-    <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
-        <span class="text-xs text-slate-500 font-medium">
-            Repositorio Oficial - Administración CONALEP Jalisco
-        </span>
-
-        <div class="flex items-center gap-3">
-            @if (Route::has('login'))
-                @auth
-                    <a href="{{ url('/dashboard') }}" class="px-4 py-2 text-xs font-bold text-white bg-conalep-green hover:bg-conalep-dark rounded-lg transition shadow-sm">
-                        Ir al Panel (Dashboard) &rarr;
-                    </a>
-                @else
-                    <a href="{{ route('login') }}" class="px-3.5 py-1.5 text-xs font-bold text-conalep-dark hover:text-conalep-green border border-slate-300 rounded-lg transition">
-                        Iniciar Sesión
-                    </a>
-
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="px-3.5 py-1.5 text-xs font-bold text-white bg-conalep-green hover:bg-conalep-dark rounded-lg transition">
-                            Registrarse
-                        </a>
-                    @endif
-                @endauth
-            @endif
-        </div>
-    </div>
-
     <!-- Banner / Encabezado principal -->
     <section class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-8 relative overflow-hidden">
         <div class="absolute top-0 left-0 w-2 h-full bg-conalep-green"></div>
