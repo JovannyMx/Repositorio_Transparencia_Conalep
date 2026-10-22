@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -48,8 +49,16 @@ class User extends Authenticatable
         ];
     }
 
-     public function areas()
+    public function areas()
     {
         return $this->belongsToMany(\App\Models\Area::class, 'user_areas');
+    }
+
+    /**
+     * Envía la notificación de recuperación de contraseña en español.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }
