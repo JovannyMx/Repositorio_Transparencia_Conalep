@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -13,7 +14,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Documento extends Model implements HasMedia
 {
-    use InteractsWithMedia, Prunable;
+    use InteractsWithMedia, Prunable, SoftDeletes;
 
     protected $fillable = [
         'area_id', 'seccion_id', 'nombre', 'archivo_path', 'extension',

@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Area extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'nombre', 'slug', 'icono', 'descripcion_corta', 'orden', 'activo',
     ];
