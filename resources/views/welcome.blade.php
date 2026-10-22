@@ -13,6 +13,7 @@
 @section('title', 'Áreas Generadoras - Administración CONALEP Jalisco')
 
 @section('content')
+<<<<<<< HEAD
 
     <!-- Barra de Acceso de Usuarios (Login / Registro / Dashboard) -->
     <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
@@ -41,6 +42,8 @@
         </div>
     </div>
 
+=======
+>>>>>>> feature/frontend-sitio-publico
     <!-- Banner / Encabezado principal -->
     <section class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-8 relative overflow-hidden">
         <div class="absolute top-0 left-0 w-2 h-full bg-conalep-green"></div>

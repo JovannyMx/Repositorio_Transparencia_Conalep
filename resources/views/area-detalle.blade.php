@@ -2,8 +2,13 @@
  |--------------------------------------------------------------------------
  | Vista Pública: Detalle de Área y Visor de Documentos
  |--------------------------------------------------------------------------
+<<<<<<< HEAD
  | Muestra las secciones y documentos del área seleccionada.
  | Incluye buscador en tiempo real y visor modal para PDFs e imágenes.
+=======
+ | Diseño híbrido con selector de vista (Lista / Carpetas Grid).
+ | Jerarquía Padre (Categoría/Año) -> Hijo (Documentos asociados).
+>>>>>>> feature/frontend-sitio-publico
  |
  | @author Desarrollo - Administración CONALEP Jalisco
 --}}
@@ -33,9 +38,15 @@
         </p>
     </header>
 
+<<<<<<< HEAD
     <!-- Filtro y Buscador JS -->
     <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+=======
+    <!-- Filtro y Selector de Vista -->
+    <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+>>>>>>> feature/frontend-sitio-publico
             
             <div class="md:col-span-2">
                 <label for="input-busqueda" class="block text-xs font-bold text-conalep-dark uppercase tracking-wider mb-2">
@@ -64,11 +75,46 @@
                 </select>
             </div>
 
+<<<<<<< HEAD
         </div>
     </section>
 
     <!-- Tabla de Documentos -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+=======
+            <!-- Botones Conmutadores de Vista -->
+            <div>
+                <label class="block text-xs font-bold text-conalep-dark uppercase tracking-wider mb-2">
+                    Modo de Vista
+                </label>
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+                    <button 
+                        type="button" 
+                        id="btnVistaLista"
+                        onclick="cambiarVistaModo('lista')"
+                        class="w-1/2 py-2 text-xs font-bold rounded-md transition bg-white text-conalep-dark shadow-sm flex items-center justify-center gap-1"
+                    >
+                        <span>📋</span> Lista
+                    </button>
+                    <button 
+                        type="button" 
+                        id="btnVistaCarpetas"
+                        onclick="cambiarVistaModo('carpetas')"
+                        class="w-1/2 py-2 text-xs font-bold rounded-md transition text-slate-600 hover:text-conalep-dark flex items-center justify-center gap-1"
+                    >
+                        <span>📁</span> Carpetas
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- =================================--------------------- -->
+    <!-- MODO 1: VISTA EN LISTA TRADICIONAL (TABLA) -->
+    <!-- =================================--------------------- -->
+    <section id="contenedorLista" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+>>>>>>> feature/frontend-sitio-publico
         <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
             <h2 class="text-base font-bold text-conalep-dark flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-conalep-green"></span>
@@ -98,6 +144,7 @@
                             $docCategoria = is_array($doc) ? ($doc['categoria'] ?? 'General') : ($doc->categoria ?? 'General');
                             $docFecha = is_array($doc) ? ($doc['fecha_publicacion'] ?? '') : ($doc->created_at ? $doc->created_at->format('d/m/Y') : '');
                             
+<<<<<<< HEAD
                             // Obtención de datos mediante Spatie Media Library
                             $media = (is_object($doc) && method_exists($doc, 'getFirstMedia')) ?$doc->getFirstMedia('archivo') : null;
                             
@@ -106,11 +153,26 @@
                             
                             // Ruta pública para visualización en modal
                             $docUrl = $docId ? route('documentos.public.ver', $docId) : '#';
+=======
+                            $media = (is_object($doc) && method_exists($doc, 'getFirstMedia')) ?$doc->getFirstMedia('archivo') : null;
+                            $docFormato =$media ? pathinfo($media->file_name, PATHINFO_EXTENSION) : (is_array($doc) ? ($doc['formato'] ?? 'PDF') : ($doc->formato ?? 'PDF'));
+                            $docTamaño = $media ? $media->human_readable_size : (is_array($doc) ? ($doc['tamaño'] ?? 'N/A') : ($doc->tamaño ?? 'N/A'));
+                            $docUrl = $docId ? route('documentos.public.ver', $docId) : '#';
+                            $yearFecha = is_object($doc) && isset($doc->created_at) ? $doc->created_at->format('Y') : (substr($docFecha, -4) ?: 'General');
+>>>>>>> feature/frontend-sitio-publico
                         @endphp
                         <tr 
                             class="fila-documento hover:bg-conalep-light/40 transition-colors"
                             data-nombre="{{ strtolower($docNombre) }}"
                             data-categoria="{{ $docCategoria }}"
+<<<<<<< HEAD
+=======
+                            data-year="{{ $yearFecha }}"
+                            data-url="{{ $docUrl }}"
+                            data-formato="{{ strtolower($docFormato) }}"
+                            data-size="{{ $docTamaño }}"
+                            data-raw-nombre="{{ $docNombre }}"
+>>>>>>> feature/frontend-sitio-publico
                         >
                             <td class="py-4 px-6 font-semibold text-slate-800 col-nombre">
                                 {{ $docNombre }}
@@ -128,7 +190,10 @@
                             </td>
                             <td class="py-4 px-6 text-right whitespace-nowrap">
                                 <div class="inline-flex items-center gap-2">
+<<<<<<< HEAD
                                     <!-- Botón para Visualizar en Modal -->
+=======
+>>>>>>> feature/frontend-sitio-publico
                                     <button 
                                         type="button"
                                         onclick="openDocumentViewer('{{ $docUrl }}', '{{ addslashes($docNombre) }}', '{{ strtolower($docFormato) }}')"
@@ -141,7 +206,10 @@
                                         Visualizar
                                     </button>
 
+<<<<<<< HEAD
                                     <!-- Botón para Descargar -->
+=======
+>>>>>>> feature/frontend-sitio-publico
                                     <a 
                                         href="{{ $docUrl }}" 
                                         target="_blank"
@@ -171,10 +239,52 @@
         </div>
     </section>
 
+<<<<<<< HEAD
     <!-- Modal Visor de Documentos -->
     <div id="viewerModal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden border border-slate-200">
             <!-- Modal Header -->
+=======
+    <!-- =================================--------------------- -->
+    <!-- MODO 2: VISTA EN CARPETAS (DISEÑO VISUAL DE GRID/TARJETAS) -->
+    <!-- =================================--------------------- -->
+    <section id="contenedorCarpetas" class="hidden">
+        <!-- Tarjetas principales estilo explorador de archivos -->
+        <div id="gridCarpetasPadre" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Renderizado dinámico vía JavaScript -->
+        </div>
+
+        <!-- Vista detallada del contenido de la carpeta seleccionada -->
+        <div id="detalleCarpetaHijo" class="hidden mt-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <button 
+                        type="button" 
+                        onclick="cerrarDetalleCarpeta()"
+                        class="p-2 bg-slate-100 hover:bg-conalep-green hover:text-white rounded-lg transition text-slate-600 font-bold text-xs flex items-center gap-1"
+                    >
+                        &larr; Volver a Carpetas
+                    </button>
+                    <h3 id="tituloCarpetaActiva" class="text-base font-bold text-conalep-dark">
+                        <!-- Nombre carpeta activa -->
+                    </h3>
+                </div>
+                <span id="badgeConteoHijos" class="text-xs bg-conalep-light text-conalep-dark font-bold px-3 py-1 rounded-full border border-conalep-mint/40">
+                    <!-- Conteo de archivos -->
+                </span>
+            </div>
+
+            <!-- Grid de archivos hijos -->
+            <div id="gridArchivosHijos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Archivos de la carpeta -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Visor de Documentos -->
+    <div id="viewerModal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden border border-slate-200">
+>>>>>>> feature/frontend-sitio-publico
             <div class="px-6 py-4 bg-conalep-dark text-white flex items-center justify-between border-b border-slate-700">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-conalep-green"></span>
@@ -183,7 +293,10 @@
                 <button onclick="closeDocumentViewer()" class="text-slate-300 hover:text-white text-2xl font-bold leading-none transition">&times;</button>
             </div>
             
+<<<<<<< HEAD
             <!-- Modal Body -->
+=======
+>>>>>>> feature/frontend-sitio-publico
             <div class="flex-1 bg-slate-100 p-2 overflow-hidden relative">
                 <iframe id="pdfFrame" class="w-full h-full border-0 hidden rounded" src=""></iframe>
                 <div id="imageViewer" class="w-full h-full hidden flex items-center justify-center overflow-auto p-4">
@@ -199,8 +312,15 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Script de Búsqueda, Filtrado y Visor -->
     <script>
+=======
+    <!-- SCRIPT DE LOGICA Y RENDERIZADO VISUAL -->
+    <script>
+        let gruposDocumentos = {};
+
+>>>>>>> feature/frontend-sitio-publico
         document.addEventListener('DOMContentLoaded', function () {
             const inputBusqueda = document.getElementById('input-busqueda');
             const selectCategoria = document.getElementById('select-categoria');
@@ -208,6 +328,10 @@
             const mensajeVacio = document.getElementById('sin-coincidencias');
             const contador = document.getElementById('contador-resultados');
 
+<<<<<<< HEAD
+=======
+            // Buscador en tiempo real para modo lista
+>>>>>>> feature/frontend-sitio-publico
             function filtrar() {
                 const texto = inputBusqueda.value.toLowerCase().trim();
                 const categoriaSeleccionada = selectCategoria.value;
@@ -241,11 +365,176 @@
                 inputBusqueda.addEventListener('input', filtrar);
                 selectCategoria.addEventListener('change', filtrar);
             }
+<<<<<<< HEAD
         });
 
         /**
          * Control del Visor Modal de Documentos
          */
+=======
+
+            // Construir la estructura lógica de carpetas
+            procesarEstructuraCarpetas();
+        });
+
+        /**
+         * Procesa los documentos en clases Padre (Carpetas) e Hijos (Archivos)
+         */
+        function procesarEstructuraCarpetas() {
+            const filas = document.querySelectorAll('.fila-documento');
+            gruposDocumentos = {};
+
+            filas.forEach(fila => {
+                const year = fila.getAttribute('data-year') || 'General';
+                if (!gruposDocumentos[year]) {
+                    gruposDocumentos[year] = [];
+                }
+                gruposDocumentos[year].push({
+                    nombre: fila.getAttribute('data-raw-nombre'),
+                    categoria: fila.getAttribute('data-categoria'),
+                    url: fila.getAttribute('data-url'),
+                    formato: fila.getAttribute('data-formato'),
+                    size: fila.getAttribute('data-size')
+                });
+            });
+
+            renderizarGridCarpetas();
+        }
+
+        /**
+         * Renderiza visualmente las carpetas Padre como Tarjetas Grandes
+         */
+        function renderizarGridCarpetas() {
+            const gridPadre = document.getElementById('gridCarpetasPadre');
+            const clavesCarpetas = Object.keys(gruposDocumentos).sort().reverse();
+
+            if (!clavesCarpetas.length) {
+                gridPadre.innerHTML = `
+                    <div class="col-span-full bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500">
+                        No hay carpetas creadas en esta área.
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            clavesCarpetas.forEach(year => {
+                const cantidadHijos = gruposDocumentos[year].length;
+                html += `
+                    <div 
+                        onclick="abrirDetalleCarpeta('${year}')"
+                        class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-conalep-green transition-all cursor-pointer group relative overflow-hidden flex flex-col justify-between"
+                    >
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-conalep-light rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                                📁
+                            </div>
+                            <span class="text-xs bg-slate-100 font-bold text-slate-600 px-2.5 py-1 rounded-full border border-slate-200">
+                                ${cantidadHijos} archivo(s)
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 text-lg group-hover:text-conalep-green transition-colors">
+                                Carpeta ${year}
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1">Haga clic para explorar los documentos pertenecientes a este periodo.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-conalep-green">
+                            <span>Ver archivos</span>
+                            <span>&rarr;</span>
+                        </div>
+                    </div>`;
+            });
+
+            gridPadre.innerHTML = html;
+        }
+
+        /**
+         * Despliega la vista interna de los archivos Hijos
+         */
+        function abrirDetalleCarpeta(year) {
+            const gridPadre = document.getElementById('gridCarpetasPadre');
+            const detalleHijo = document.getElementById('detalleCarpetaHijo');
+            const titulo = document.getElementById('tituloCarpetaActiva');
+            const badge = document.getElementById('badgeConteoHijos');
+            const gridArchivos = document.getElementById('gridArchivosHijos');
+
+            const listaHijos = gruposDocumentos[year] || [];
+
+            titulo.innerHTML = `📁 Carpeta / Periodo ${year}`;
+            badge.textContent = `${listaHijos.length} documento(s) encontrados`;
+
+            let htmlArchivos = '';
+            listaHijos.forEach(archivo => {
+                const nombreEscapado = archivo.nombre.replace(/'/g, "\\'");
+                htmlArchivos += `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between hover:bg-white hover:shadow-sm transition">
+                        <div class="flex items-start gap-3 mb-3">
+                            <span class="text-2xl">📄</span>
+                            <div class="overflow-hidden">
+                                <h5 class="font-bold text-slate-800 text-xs truncate" title="${archivo.nombre}">
+                                    ${archivo.nombre}
+                                </h5>
+                                <span class="inline-block mt-1 text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-semibold">
+                                    ${archivo.categoria}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-200 text-xs">
+                            <span class="font-bold text-conalep-magenta uppercase text-[10px]">${archivo.formato} (${archivo.size})</span>
+                            <div class="flex items-center gap-1">
+                                <button 
+                                    type="button" 
+                                    onclick="openDocumentViewer('${archivo.url}', '${nombreEscapado}', '${archivo.formato}')"
+                                    class="px-2.5 py-1 bg-conalep-green hover:bg-conalep-dark text-white font-bold rounded text-[11px] transition"
+                                >
+                                    Ver
+                                </button>
+                                <a 
+                                    href="${archivo.url}" 
+                                    target="_blank" 
+                                    download 
+                                    class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded text-[11px] transition"
+                                >
+                                    &darr;
+                                </a>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            gridArchivos.innerHTML = htmlArchivos;
+
+            // Ocultar cuadrícula padre y mostrar detalle de hijos
+            gridPadre.classList.add('hidden');
+            detalleHijo.classList.remove('hidden');
+        }
+
+        function cerrarDetalleCarpeta() {
+            document.getElementById('gridCarpetasPadre').classList.remove('hidden');
+            document.getElementById('detalleCarpetaHijo').classList.add('hidden');
+        }
+
+        function cambiarVistaModo(tipo) {
+            const lista = document.getElementById('contenedorLista');
+            const carpetas = document.getElementById('contenedorCarpetas');
+            const btnLista = document.getElementById('btnVistaLista');
+            const btnCarpetas = document.getElementById('btnVistaCarpetas');
+
+            if (tipo === 'lista') {
+                lista.classList.remove('hidden');
+                carpetas.classList.add('hidden');
+                btnLista.className = "w-1/2 py-2 text-xs font-bold rounded-md transition bg-white text-conalep-dark shadow-sm flex items-center justify-center gap-1";
+                btnCarpetas.className = "w-1/2 py-2 text-xs font-bold rounded-md transition text-slate-600 hover:text-conalep-dark flex items-center justify-center gap-1";
+            } else {
+                carpetas.classList.remove('hidden');
+                lista.classList.add('hidden');
+                cerrarDetalleCarpeta(); // Reset a la vista de tarjetas principales
+                btnCarpetas.className = "w-1/2 py-2 text-xs font-bold rounded-md transition bg-white text-conalep-dark shadow-sm flex items-center justify-center gap-1";
+                btnLista.className = "w-1/2 py-2 text-xs font-bold rounded-md transition text-slate-600 hover:text-conalep-dark flex items-center justify-center gap-1";
+            }
+        }
+
+>>>>>>> feature/frontend-sitio-publico
         function openDocumentViewer(url, title, extension) {
             const modal = document.getElementById('viewerModal');
             const titleElem = document.getElementById('viewerTitle');
@@ -257,14 +546,20 @@
 
             titleElem.textContent = title;
 
+<<<<<<< HEAD
             // Ocultar contenedores
+=======
+>>>>>>> feature/frontend-sitio-publico
             pdfFrame.classList.add('hidden');
             imageViewer.classList.add('hidden');
             unsupportedViewer.classList.add('hidden');
 
             const ext = extension.toLowerCase();
 
+<<<<<<< HEAD
             // Detectar visualización por PDF o la URL generada
+=======
+>>>>>>> feature/frontend-sitio-publico
             if (ext === 'pdf' || url.includes('/documentos/') || url.endsWith('.pdf')) {
                 pdfFrame.src = url;
                 pdfFrame.classList.remove('hidden');
