@@ -9,15 +9,15 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Tarea programada para eliminar documentos cuya fecha de vencimiento ya pasó
-Schedule::call(function () {
-    $documentosVencidos = Documento::whereNotNull('fecha_vencimiento')
-        ->whereDate('fecha_vencimiento', '<', now())
-        ->get();
+// 1. Comando manual por si quieres limpiar documentos escribiendo: php artisan documentos:limpiar-vencidos
+Artisan::command('documentos:limpiar-vencidos', function () {
+    $this->call('model:prune', [
+        '--model' => [Documento::class],
+    ]);
+})->purpose('Elimina inmediatamente los documentos cuya fecha de vencimiento ya pasó');
 
-    foreach ($documentosVencidos as $documento) {
-        // Al ejecutar ->delete(), Laravel eliminará el registro
-        // y Spatie Media Library se encargará de borrar el archivo físico automáticamente.
-        $documento->delete();
-    }
-})->daily();
+// 2. Tarea programada automática usando el trait Prunable de Documento.php
+// Nota: Se cambia a everyMinute() para que en entorno local no tengas que esperar hasta medianoche
+Schedule::command('model:prune', [
+    '--model' => [Documento::class],
+])->everyMinute();

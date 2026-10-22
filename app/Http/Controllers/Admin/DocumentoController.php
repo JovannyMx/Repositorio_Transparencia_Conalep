@@ -12,6 +12,15 @@ class DocumentoController extends Controller
 {
     public function index(Area $area)
     {
+        // 1. Eliminar automáticamente los documentos vencidos antes de mostrar la lista.
+        // Usamos get()->each->delete() para que se dispare el evento de Spatie Media Library
+        // y se borre también el archivo físico en storage.
+        Documento::whereNotNull('fecha_vencimiento')
+            ->whereDate('fecha_vencimiento', '<', now())
+            ->get()
+            ->each->delete();
+
+        // 2. Consultar los documentos vigentes del área
         $documentos = $area->documentos()->with('seccion')->orderBy('orden')->get();
 
         return view('admin.documentos.index', compact('area', 'documentos'));

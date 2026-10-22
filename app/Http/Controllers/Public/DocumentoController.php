@@ -7,8 +7,21 @@ use App\Models\Documento;
 
 class DocumentoController extends Controller
 {
+    /**
+     * Elimina automáticamente los documentos cuya fecha de vencimiento ya pasó.
+     */
+    private function limpiarVencidos(): void
+    {
+        Documento::whereNotNull('fecha_vencimiento')
+            ->whereDate('fecha_vencimiento', '<', now())
+            ->get()
+            ->each->delete();
+    }
+
     public function preview(string $liga)
     {
+        $this->limpiarVencidos();
+
         $documento = Documento::where('liga_publica', $liga)->firstOrFail();
 
         $media = $documento->getFirstMedia('archivo');
@@ -34,6 +47,8 @@ class DocumentoController extends Controller
 
     public function descargar(string $liga)
     {
+        $this->limpiarVencidos();
+
         $documento = Documento::where('liga_publica', $liga)->firstOrFail();
 
         $media = $documento->getFirstMedia('archivo');
