@@ -26,7 +26,7 @@ class AreaController extends Controller
 
         $areas = Area::where('activo', true)
             ->orderBy('orden')
-            ->withCount('documentos') // Contar documentos relacionados vigentes
+            ->withCount('documentos')
             ->get();
 
         return view('public.areas.index', compact('areas'));

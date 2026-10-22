@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Area extends Model
 {
@@ -38,27 +37,34 @@ class Area extends Model
     }
 
     /**
-     * URL de la imagen subida desde el formulario, o null si no hay.
-     * Uso en vistas: $area->icono_url
+     * URL de la imagen de forma flexible para evitar que devuelva null.
      */
     public function getIconoUrlAttribute(): ?string
     {
-        if ($this->icono
-            && str_starts_with($this->icono, 'iconos/')
-            && Storage::disk('public')->exists($this->icono)) {
-            return asset('storage/' . $this->icono);
+        if (empty($this->icono)) {
+            return null;
         }
 
-        return null;
+        // Si ya es una URL completa
+        if (str_starts_with($this->icono, 'http://') || str_starts_with($this->icono, 'https://')) {
+            return $this->icono;
+        }
+
+        // Si ya incluye la ruta de storage
+        if (str_starts_with($this->icono, 'storage/')) {
+            return asset($this->icono);
+        }
+
+        // Para cualquier ruta relativa guardada en el disco public (ej. iconos/foto.png)
+        return asset('storage/' . ltrim($this->icono, '/'));
     }
 
     /**
-     * Trazo SVG guardado de la forma antigua (texto del atributo "d"), o null.
-     * Uso en vistas: $area->icono_svg_path
+     * Trazo SVG guardado de la forma antigua.
      */
     public function getIconoSvgPathAttribute(): ?string
     {
-        if ($this->icono && ! str_starts_with($this->icono, 'iconos/')) {
+        if (!empty($this->icono) && !str_contains($this->icono, '/') && !str_ends_with($this->icono, '.png') && !str_ends_with($this->icono, '.jpg') && !str_ends_with($this->icono, '.webp') && !str_ends_with($this->icono, '.svg')) {
             return $this->icono;
         }
 

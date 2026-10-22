@@ -44,6 +44,80 @@
                 </div>
             @endif
 
+            {{-- Formulario de Filtros Actualizado --}}
+            <form method="GET" action="{{ route('admin.areas.documentos.index', $area) }}" class="bg-white p-5 rounded-2xl shadow-xl shadow-conalep-primary/5 mb-6 flex flex-wrap gap-4 items-end border border-slate-100">
+                
+                {{-- Buscar por nombre --}}
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Buscar documento</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </span>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Nombre del documento..."
+                               class="pl-9 w-full rounded-xl border-slate-200 shadow-sm focus:border-conalep-primary focus:ring-conalep-primary text-sm">
+                    </div>
+                </div>
+
+                {{-- Filtro por Sección (Con Subsecciones Jerárquicas) --}}
+                <div class="w-full sm:w-56">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Sección</label>
+                    <select name="seccion_id" class="w-full rounded-xl border-slate-200 shadow-sm focus:border-conalep-primary focus:ring-conalep-primary text-sm">
+                        <option value="">Todas las secciones</option>
+                        
+                        @php
+                            $renderSecciones = function ($secciones, $nivel = 0) use (&$renderSecciones) {
+                                foreach ($secciones as $seccion) {
+                                    $prefijo = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $nivel) . ($nivel > 0 ? '└─ ' : '');
+                                    $selected = request('seccion_id') == $seccion->id ? 'selected' : '';
+                                    
+                                    echo '<option value="' . $seccion->id . '" ' . $selected . '>' . $prefijo . e($seccion->nombre) . '</option>';
+                                    
+                                    if ($seccion->childrenRecursive && $seccion->childrenRecursive->isNotEmpty()) {
+                                        $renderSecciones($seccion->childrenRecursive, $nivel + 1);
+                                    }
+                                }
+                            };
+                        @endphp
+
+                        {!! $renderSecciones($secciones ?? []) !!}
+                    </select>
+                </div>
+
+                {{-- Filtro por Tipo (Extensión) --}}
+                <div class="w-full sm:w-36">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Tipo</label>
+                    <select name="extension" class="w-full rounded-xl border-slate-200 shadow-sm focus:border-conalep-primary focus:ring-conalep-primary text-sm">
+                        <option value="">Todos</option>
+                        <option value="pdf" {{ request('extension') == 'pdf' ? 'selected' : '' }}>PDF</option>
+                        <option value="doc" {{ request('extension') == 'doc' ? 'selected' : '' }}>DOC</option>
+                        <option value="docx" {{ request('extension') == 'docx' ? 'selected' : '' }}>DOCX</option>
+                        <option value="xls" {{ request('extension') == 'xls' ? 'selected' : '' }}>XLS</option>
+                        <option value="xlsx" {{ request('extension') == 'xlsx' ? 'selected' : '' }}>XLSX</option>
+                    </select>
+                </div>
+
+                {{-- Filtro por Vencimiento --}}
+                <div class="w-full sm:w-44">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Vencimiento</label>
+                    <select name="vencimiento" class="w-full rounded-xl border-slate-200 shadow-sm focus:border-conalep-primary focus:ring-conalep-primary text-sm">
+                        <option value="">Todos</option>
+                        <option value="con_fecha" {{ request('vencimiento') == 'con_fecha' ? 'selected' : '' }}>Con vencimiento</option>
+                        <option value="sin_fecha" {{ request('vencimiento') == 'sin_fecha' ? 'selected' : '' }}>Sin vencimiento</option>
+                    </select>
+                </div>
+
+                {{-- Botones de acción --}}
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button type="submit" class="flex-1 sm:flex-none inline-flex items-center justify-center bg-conalep-primary hover:bg-conalep-dark text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-conalep-primary/30 transition-all duration-200">
+                        Filtrar
+                    </button>
+                    <a href="{{ route('admin.areas.documentos.index', $area) }}" class="flex-1 sm:flex-none inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+
             {{-- Tarjeta de Tabla --}}
             <div class="bg-white shadow-xl shadow-conalep-primary/5 rounded-2xl border-t-4 border-conalep-primary overflow-hidden">
                 <div class="overflow-x-auto">
@@ -55,7 +129,6 @@
                                 <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Sección</th>
                                 <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tipo</th>
                                 <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Fecha</th>
-                                <!-- Nueva columna para la fecha de vencimiento -->
                                 <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Vencimiento</th>
                                 <th scope="col" class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Liga</th>
                                 <th scope="col" class="px-6 py-4 text-right text-[11px] font-bold text-slate-500 uppercase tracking-wider">Acciones</th>
@@ -101,7 +174,7 @@
                                         {{ $documento->fecha_publicacion?->format('d/m/Y') }}
                                     </td>
                                     
-                                    <!-- NUEVO: Fecha de vencimiento -->
+                                    <!-- Fecha de vencimiento -->
                                     <td class="px-6 py-4 text-sm">
                                         @if($documento->fecha_vencimiento)
                                             <span class="text-slate-600 font-medium">
@@ -146,18 +219,17 @@
                                     </td>
                                 </tr>
                             @empty
-                                <!-- Estado Vacío Mejorado (Se actualizó colspan de 7 a 8) -->
                                 <tr>
                                     <td colspan="8" class="px-6 py-16 text-center">
                                         <div class="flex flex-col items-center justify-center">
                                             <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center shadow-sm mb-4 text-slate-400 border border-slate-100">
                                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                             </div>
-                                            <h3 class="text-slate-900 font-bold text-lg mb-1">Área sin documentos</h3>
-                                            <p class="text-slate-500 text-sm max-w-sm mx-auto mb-5">No se han cargado documentos en esta área todavía. Comienza agregando el primero.</p>
+                                            <h3 class="text-slate-900 font-bold text-lg mb-1">No se encontraron documentos</h3>
+                                            <p class="text-slate-500 text-sm max-w-sm mx-auto mb-5">No hay registros que coincidan con los filtros aplicados o el área aún no tiene documentos.</p>
                                             
                                             <a href="{{ route('admin.areas.documentos.create', $area) }}" class="inline-flex items-center text-sm font-bold text-conalep-primary hover:text-conalep-dark transition-colors group">
-                                                Cargar mi primer documento
+                                                Cargar un documento
                                                 <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                             </a>
                                         </div>
@@ -171,7 +243,7 @@
         </div>
     </div>
 
-    <!-- Script para habilitar Drag & Drop (Opcional: Si ya no usarás la función de arrastrar, puedes borrar toda esta etiqueta <script>) -->
+    <!-- Script de Sortable -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

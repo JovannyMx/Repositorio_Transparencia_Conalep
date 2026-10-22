@@ -1,6 +1,14 @@
 <x-layouts.public>
     <x-slot name="header">
         <a href="{{ route('publico.areas.index') }}" class="text-sm text-indigo-600 hover:underline">← Todas las áreas</a>
+        
+        {{-- Mostrar el icono/imagen del área en la vista de detalle --}}
+        @if ($area->icono)
+            <div class="mt-3 mb-2">
+                <img src="{{ asset('storage/' . $area->icono) }}" alt="{{ $area->nombre }}" class="w-20 h-20 object-cover rounded-lg shadow-sm border border-gray-100">
+            </div>
+        @endif
+
         <h1 class="font-semibold text-2xl text-gray-800 mt-1">{{ $area->nombre }}</h1>
         @if ($area->descripcion_corta)
             <p class="text-sm text-gray-500 mt-1">{{ $area->descripcion_corta }}</p>

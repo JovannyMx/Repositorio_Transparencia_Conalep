@@ -10,21 +10,37 @@ use Illuminate\Http\Request;
 
 class DocumentoController extends Controller
 {
-    public function index(Area $area)
-    {
-        // 1. Eliminar automáticamente los documentos vencidos antes de mostrar la lista.
-        // Usamos get()->each->delete() para que se dispare el evento de Spatie Media Library
-        // y se borre también el archivo físico en storage.
-        Documento::whereNotNull('fecha_vencimiento')
-            ->whereDate('fecha_vencimiento', '<', now())
-            ->get()
-            ->each->delete();
+    public function index(Request $request, Area $area)
+{
+    $query = $area->documentos();
 
-        // 2. Consultar los documentos vigentes del área
-        $documentos = $area->documentos()->with('seccion')->orderBy('orden')->get();
-
-        return view('admin.documentos.index', compact('area', 'documentos'));
+    if ($request->filled('search')) {
+        $query->where('nombre', 'like', '%' . $request->search . '%');
     }
+
+    if ($request->filled('seccion_id')) {
+        $query->where('seccion_id', $request->seccion_id);
+    }
+
+    if ($request->filled('extension')) {
+        $query->where('extension', $request->extension);
+    }
+
+    if ($request->filled('vencimiento')) {
+        if ($request->vencimiento === 'con_fecha') {
+            $query->whereNotNull('fecha_vencimiento');
+        } elseif ($request->vencimiento === 'sin_fecha') {
+            $query->whereNull('fecha_vencimiento');
+        }
+    }
+
+    $documentos = $query->orderBy('orden')->paginate(10)->withQueryString();
+    
+    // Traemos las secciones principales junto con sus subsecciones recursivas
+    $secciones = $area->secciones()->with('childrenRecursive')->whereNull('parent_id')->get();
+
+    return view('admin.documentos.index', compact('documentos', 'secciones', 'area'));
+}
 
     public function create(Area $area)
     {
