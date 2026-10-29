@@ -42,11 +42,30 @@
     </div>
 
     <div>
+        <label class="block text-sm font-medium text-gray-700">Vista por defecto</label>
+        <select name="modo_vista" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value="carpetas" {{ old('modo_vista', $seccion->modo_vista ?? 'carpetas') == 'carpetas' ? 'selected' : '' }}>Vista de Carpetas</option>
+            <option value="lista" {{ old('modo_vista', $seccion->modo_vista ?? '') == 'lista' ? 'selected' : '' }}>Vista de Lista</option>
+        </select>
+        @error('modo_vista')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+        <p class="mt-1 text-xs text-gray-500">Elige cómo se mostrarán los elementos al entrar a esta sección por primera vez.</p>
+    </div>
+
+    <div>
         <label class="block text-sm font-medium text-gray-700">Orden de despliegue</label>
         <input type="number" name="orden" value="{{ old('orden', $seccion->orden ?? 0) }}" min="0"
                class="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
         @error('orden')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
+    </div>
+
+    <div class="flex items-center pt-2">
+        <input type="checkbox" name="activo" id="activo" value="1"
+               {{ old('activo', $seccion->activo ?? true) ? 'checked' : '' }}
+               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+        <label for="activo" class="ml-2 text-sm text-gray-700 font-medium">Sección activa (visible al público)</label>
     </div>
 </div>

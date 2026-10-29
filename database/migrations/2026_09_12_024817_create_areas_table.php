@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('descripcion_corta')->nullable();
             $table->integer('orden')->default(0);
             $table->boolean('activo')->default(true);
+            $table->string('modo_vista')->default('lista'); // <-- AGREGAR ESTA LÍNEA
             $table->timestamps();
         });
     }
