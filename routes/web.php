@@ -6,21 +6,7 @@ use App\Models\Documento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-
-/**
- * Función auxiliar para limpiar documentos vencidos en las rutas públicas
- */
-if (!function_exists('limpiarDocumentosVencidos')) {
-    function limpiarDocumentosVencidos(): void
-    {
-        if (Schema::hasTable('documentos')) {
-            Documento::whereNotNull('fecha_vencimiento')
-                ->whereDate('fecha_vencimiento', '<', now())
-                ->get()
-                ->each->delete();
-        }
-    }
-}
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,13 +14,17 @@ if (!function_exists('limpiarDocumentosVencidos')) {
 |--------------------------------------------------------------------------
 */
 
-// 1. Portal Principal (Home)
+// Alias directo para que 'publico.areas.index' no marque error en Blade
 Route::get('/', function () {
-    limpiarDocumentosVencidos();
-
     if (Schema::hasTable('areas')) {
         $areas = Area::where('activo', true)
-            ->withCount('documentos')
+            ->withCount(['documentos' => function ($query) {
+                $query->where('activo', true)
+                      ->where(function ($q) {
+                          $q->whereNull('fecha_vencimiento')
+                            ->orWhere('fecha_vencimiento', '>=', Carbon::today());
+                      });
+            }])
             ->orderBy('orden', 'asc')
             ->get();
     } else {
@@ -42,16 +32,24 @@ Route::get('/', function () {
     }
 
     return view('welcome', compact('areas'));
+})->name('publico.areas.index');
+
+// Mantenemos también la ruta nombrada 'home' apuntando a la misma lógica
+Route::get('/home', function () {
+    return redirect()->route('publico.areas.index');
 })->name('home');
 
 // 2. Vista Detallada por Área
 Route::get('/area/{slug}', function ($slug) {
-    limpiarDocumentosVencidos();
-
     $area = Area::where('slug', $slug)
         ->where('activo', true)
         ->with(['secciones', 'documentos' => function ($q) {
-            $q->latest();
+            $q->where('activo', true)
+              ->where(function ($query) {
+                  $query->whereNull('fecha_vencimiento')
+                        ->orWhere('fecha_vencimiento', '>=', Carbon::today());
+              })
+              ->latest();
         }])
         ->firstOrFail();
 
@@ -62,12 +60,15 @@ Route::get('/area/{slug}', function ($slug) {
 
 // 3. Buscador Global Público (Consulta Real a BD)
 Route::get('/buscar', function (Request $request) {
-    limpiarDocumentosVencidos();
-
     $query = trim($request->input('q', ''));
 
     if (!empty($query)) {
         $resultados = Documento::with(['area', 'seccion'])
+            ->where('activo', true)
+            ->where(function ($q) {
+                $q->whereNull('fecha_vencimiento')
+                  ->orWhere('fecha_vencimiento', '>=', Carbon::today());
+            })
             ->where(function ($q) use ($query) {
                 $q->where('nombre', 'LIKE', "%{$query}%")
                   ->orWhereHas('seccion', function ($sq) use ($query) {
@@ -93,9 +94,8 @@ Route::get('/contacto-transparencia', function () {
 
 // 5. Visualización Pública de Documentos (Sin autenticación para iframe/modal)
 Route::get('/documentos/{documento}/ver', function (Documento $documento) {
-    if ($documento->fecha_vencimiento && $documento->fecha_vencimiento->isPast() && !$documento->fecha_vencimiento->isToday()) {
-        $documento->delete();
-        abort(404, 'El documento ha vencido y ya no se encuentra disponible.');
+    if (!$documento->activo || ($documento->fecha_vencimiento && $documento->fecha_vencimiento->isPast() && !$documento->fecha_vencimiento->isToday())) {
+        abort(404, 'El documento ha vencido o no está disponible.');
     }
 
     if (method_exists($documento, 'getFirstMedia')) {
@@ -123,7 +123,6 @@ Route::get('/documentos/{documento}/ver', function (Documento $documento) {
 */
 
 Route::get('/dashboard', function () {
-    limpiarDocumentosVencidos();
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 

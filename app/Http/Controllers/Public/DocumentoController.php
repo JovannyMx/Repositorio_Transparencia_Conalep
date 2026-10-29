@@ -4,25 +4,27 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Documento;
+use Carbon\Carbon;
 
 class DocumentoController extends Controller
 {
     /**
-     * Elimina automáticamente los documentos cuya fecha de vencimiento ya pasó.
+     * Valida que un documento esté activo y no vencido para el consumo público.
      */
-    private function limpiarVencidos(): void
+    private function obtenerDocumentoVigente(string $liga): Documento
     {
-        Documento::whereNotNull('fecha_vencimiento')
-            ->whereDate('fecha_vencimiento', '<', now())
-            ->get()
-            ->each->delete();
+        return Documento::where('liga_publica', $liga)
+            ->where('activo', true)
+            ->where(function ($query) {
+                $query->whereNull('fecha_vencimiento')
+                      ->orWhere('fecha_vencimiento', '>=', Carbon::today());
+            })
+            ->firstOrFail(); // Si fue eliminado (SoftDeletes), está inactivo o vencido, regresa 404
     }
 
     public function preview(string $liga)
     {
-        $this->limpiarVencidos();
-
-        $documento = Documento::where('liga_publica', $liga)->firstOrFail();
+        $documento = $this->obtenerDocumentoVigente($liga);
 
         $media = $documento->getFirstMedia('archivo');
 
@@ -47,9 +49,7 @@ class DocumentoController extends Controller
 
     public function descargar(string $liga)
     {
-        $this->limpiarVencidos();
-
-        $documento = Documento::where('liga_publica', $liga)->firstOrFail();
+        $documento = $this->obtenerDocumentoVigente($liga);
 
         $media = $documento->getFirstMedia('archivo');
 

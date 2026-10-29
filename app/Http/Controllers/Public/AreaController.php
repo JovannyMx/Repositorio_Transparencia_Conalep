@@ -7,27 +7,22 @@ use Illuminate\Http\Request;
 use App\Models\Area;
 use App\Models\Documento;
 use App\Models\Seccion;
+use Carbon\Carbon;
 
 class AreaController extends Controller
 {
-    /**
-     * Elimina automáticamente los documentos cuya fecha de vencimiento ya pasó.
-     */
-    private function limpiarVencidos(): void
-    {
-        Documento::whereNotNull('fecha_vencimiento')
-            ->whereDate('fecha_vencimiento', '<', now())
-            ->get()
-            ->each->delete();
-    }
-
     public function index()
     {
-        $this->limpiarVencidos();
-
         $areas = Area::where('activo', true)
             ->orderBy('orden')
-            ->withCount('documentos')
+            ->withCount(['documentos' => function ($query) {
+                // Solo cuenta para la vista pública los documentos activos y vigentes
+                $query->where('activo', true)
+                      ->where(function ($q) {
+                          $q->whereNull('fecha_vencimiento')
+                            ->orWhere('fecha_vencimiento', '>=', Carbon::today());
+                      });
+            }])
             ->get();
 
         return view('public.areas.index', compact('areas'));
@@ -38,10 +33,7 @@ class AreaController extends Controller
         // 1. Validar que el Área esté activa
         abort_unless($area->activo, 404);
 
-        // 2. Limpiar documentos vencidos
-        $this->limpiarVencidos();
-
-        // 3. Cargar las secciones RAÍZ (parent_id = null) que estén ACTIVAS y NO ELIMINADAS, 
+        // 2. Cargar las secciones RAÍZ (parent_id = null) que estén ACTIVAS y NO ELIMINADAS,
         // junto con su árbol completo de subsecciones activas.
         $secciones = $area->secciones()
             ->whereNull('parent_id')
@@ -49,12 +41,14 @@ class AreaController extends Controller
             ->whereNull('deleted_at')
             ->with(['childrenRecursive' => function ($query) {
                 $query->where('activo', true)->whereNull('deleted_at');
-            }, 'documentos'])
+            }, 'documentos' => function ($query) {
+                // Filtramos también los documentos en la relación directa de secciones
+                $this->filtrarDocumentosVigentes($query);
+            }])
             ->orderBy('orden')
             ->get();
 
-        // 4. Función recursiva para recolectar únicamente los IDs de secciones 
-        // cuyas secciones padre también estén totalmente activas de la raíz hacia abajo.
+        // 3. Función recursiva para recolectar únicamente los IDs de secciones activas
         $obtenerIdsValidos = function ($coleccion) use (&$obtenerIdsValidos) {
             $ids = [];
             foreach ($coleccion as $seccion) {
@@ -71,15 +65,35 @@ class AreaController extends Controller
 
         $idsSeccionesActivas = $obtenerIdsValidos($secciones);
 
-        // 5. Traer ÚNICAMENTE los documentos asignados a las secciones válidas
-        // e incluir 'seccion.parentRecursive' para que Blade pueda validar ancestros sin peticiones extra SQL.
+        // 4. Traer los documentos del área que pertenezcan a secciones válidas O que no tengan sección,
+        // asegurando que estén ACTIVOS y NO VENCIDOS (sin borrar nada de la BD).
         $documentos = Documento::query()
             ->where('area_id', $area->id)
-            ->whereIn('seccion_id', $idsSeccionesActivas)
-            ->with(['seccion.parentRecursive'])
+            ->where(function ($query) use ($idsSeccionesActivas) {
+                $query->whereIn('seccion_id', $idsSeccionesActivas)
+                      ->orWhereNull('seccion_id'); // Incluye documentos directos del área
+            });
+
+        // Aplicar filtros de visibilidad pública
+        $this->filtrarDocumentosVigentes($documentos);
+
+        $documentos = $documentos->with(['seccion.parentRecursive'])
             ->orderBy('orden')
             ->get();
 
         return view('public.areas.show', compact('area', 'secciones', 'documentos'));
+    }
+
+    /**
+     * Aplica el filtro público: solo documentos activos y cuya fecha de vencimiento no haya pasado.
+     * Los eliminados (deleted_at) Laravel los descarta en automático vía SoftDeletes.
+     */
+    private function filtrarDocumentosVigentes($query): void
+    {
+        $query->where('activo', true)
+              ->where(function ($q) {
+                  $q->whereNull('fecha_vencimiento')
+                    ->orWhere('fecha_vencimiento', '>=', Carbon::today());
+              });
     }
 }
