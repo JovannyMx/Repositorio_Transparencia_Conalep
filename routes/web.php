@@ -93,13 +93,11 @@ Route::get('/contacto-transparencia', function () {
 
 // 5. Visualización Pública de Documentos (Sin autenticación para iframe/modal)
 Route::get('/documentos/{documento}/ver', function (Documento $documento) {
-    // Si el documento que intentan abrir ya venció, lo eliminamos y lanzamos 404
     if ($documento->fecha_vencimiento && $documento->fecha_vencimiento->isPast() && !$documento->fecha_vencimiento->isToday()) {
         $documento->delete();
         abort(404, 'El documento ha vencido y ya no se encuentra disponible.');
     }
 
-    // Si utilizas Spatie Media Library
     if (method_exists($documento, 'getFirstMedia')) {
         $media = $documento->getFirstMedia('archivo');
         if ($media) {
@@ -110,7 +108,6 @@ Route::get('/documentos/{documento}/ver', function (Documento $documento) {
         }
     }
 
-    // Alternativa en caso de almacenar el path directamente en la base de datos
     if (!empty($documento->archivo_path) && file_exists(storage_path('app/public/' . $documento->archivo_path))) {
         return response()->file(storage_path('app/public/' . $documento->archivo_path));
     }
@@ -164,6 +161,9 @@ Route::middleware('auth')->group(function () {
             Route::put('/{documento}', [\App\Http\Controllers\Admin\DocumentoController::class, 'update'])->name('update');
             Route::delete('/{documento}', [\App\Http\Controllers\Admin\DocumentoController::class, 'destroy'])->name('destroy');
             Route::get('/{documento}/vista-previa', [\App\Http\Controllers\Admin\DocumentoController::class, 'preview'])->name('preview');
+            
+            // Ruta para restaurar documentos lógicamente desde la papelera
+            Route::patch('/{id}/restore', [\App\Http\Controllers\Admin\DocumentoController::class, 'restore'])->name('restore');
         });
 
         // Gestión de Usuarios (Solo Administrador)
