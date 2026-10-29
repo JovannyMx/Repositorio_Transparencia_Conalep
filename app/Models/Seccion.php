@@ -19,7 +19,7 @@ class Seccion extends Model
     ];
     
     protected $fillable = [
-        'area_id', 'parent_id', 'nombre', 'tipo', 'orden', 'modo_vista', 'activo', 'publico',
+        'area_id', 'parent_id', 'nombre', 'tipo', 'orden', 'activo', 'publico',
     ];
 
     /**

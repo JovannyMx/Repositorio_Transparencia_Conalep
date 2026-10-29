@@ -36,7 +36,6 @@ class SeccionController extends Controller
             'tipo' => 'nullable|string|in:anio,periodo,categoria,libre',
             'parent_id' => 'nullable|exists:secciones,id',
             'orden' => 'nullable|integer|min:0',
-            'modo_vista' => 'required|string|in:lista,carpetas',
             'activo' => 'nullable|boolean',
         ]);
 
@@ -67,7 +66,6 @@ class SeccionController extends Controller
             'tipo' => 'nullable|string|in:anio,periodo,categoria,libre',
             'parent_id' => 'nullable|exists:secciones,id',
             'orden' => 'nullable|integer|min:0',
-            'modo_vista' => 'required|string|in:lista,carpetas',
             'activo' => 'nullable|boolean',
         ]);
 
