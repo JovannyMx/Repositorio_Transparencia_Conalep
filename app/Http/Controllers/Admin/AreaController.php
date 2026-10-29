@@ -33,6 +33,7 @@ class AreaController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion_corta' => 'nullable|string|max:500',
+            'modo_vista' => 'required|in:lista,carpetas', // Validamos el modo de vista
             'orden' => 'nullable|integer|min:0',
             'activo' => 'nullable|boolean',
             'icono' => 'nullable|file|mimes:png,jpg,jpeg,webp,svg|max:1024',
@@ -64,6 +65,7 @@ class AreaController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion_corta' => 'nullable|string|max:500',
+            'modo_vista' => 'required|in:lista,carpetas', // Validamos el modo de vista
             'orden' => 'nullable|integer|min:0',
             'activo' => 'nullable|boolean',
             'icono' => 'nullable|file|mimes:png,jpg,jpeg,webp,svg|max:1024',

@@ -11,36 +11,45 @@ use Illuminate\Http\Request;
 class DocumentoController extends Controller
 {
     public function index(Request $request, Area $area)
-{
-    $query = $area->documentos();
-
-    if ($request->filled('search')) {
-        $query->where('nombre', 'like', '%' . $request->search . '%');
-    }
-
-    if ($request->filled('seccion_id')) {
-        $query->where('seccion_id', $request->seccion_id);
-    }
-
-    if ($request->filled('extension')) {
-        $query->where('extension', $request->extension);
-    }
-
-    if ($request->filled('vencimiento')) {
-        if ($request->vencimiento === 'con_fecha') {
-            $query->whereNotNull('fecha_vencimiento');
-        } elseif ($request->vencimiento === 'sin_fecha') {
-            $query->whereNull('fecha_vencimiento');
+    {
+        // Si el filtro de estado es 'eliminados', consultamos la papelera de esta área
+        if ($request->filled('estado') && $request->estado === 'eliminados') {
+            $query = $area->documentos()->onlyTrashed();
+        } else {
+            $query = $area->documentos(); // Por defecto muestra los activos
         }
+
+        // Filtro por nombre o texto de búsqueda
+        if ($request->filled('search')) {
+            $query->where('nombre', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtro por sección
+        if ($request->filled('seccion_id')) {
+            $query->where('seccion_id', $request->seccion_id);
+        }
+
+        // Filtro por tipo de archivo
+        if ($request->filled('extension')) {
+            $query->where('extension', $request->extension);
+        }
+
+        // Filtro por vencimiento
+        if ($request->filled('vencimiento')) {
+            if ($request->vencimiento === 'con_fecha') {
+                $query->whereNotNull('fecha_vencimiento');
+            } elseif ($request->vencimiento === 'sin_fecha') {
+                $query->whereNull('fecha_vencimiento');
+            }
+        }
+
+        $documentos = $query->orderBy('orden')->paginate(10)->withQueryString();
+        
+        // Traemos las secciones principales junto con sus subsecciones recursivas
+        $secciones = $area->secciones()->with('childrenRecursive')->whereNull('parent_id')->get();
+
+        return view('admin.documentos.index', compact('documentos', 'secciones', 'area'));
     }
-
-    $documentos = $query->orderBy('orden')->paginate(10)->withQueryString();
-    
-    // Traemos las secciones principales junto con sus subsecciones recursivas
-    $secciones = $area->secciones()->with('childrenRecursive')->whereNull('parent_id')->get();
-
-    return view('admin.documentos.index', compact('documentos', 'secciones', 'area'));
-}
 
     public function create(Area $area)
     {
@@ -126,6 +135,16 @@ class DocumentoController extends Controller
         $documento->delete();
 
         return redirect()->route('admin.areas.documentos.index', $area)
-            ->with('success', 'Documento eliminado correctamente.');
+            ->with('success', 'Documento enviado a la papelera correctamente.');
+    }
+
+    // Método para restaurar el documento
+    public function restore(Area $area, $id)
+    {
+        $documento = $area->documentos()->withTrashed()->findOrFail($id);
+        $documento->restore();
+
+        return redirect()->route('admin.areas.documentos.index', $area)
+                         ->with('success', 'Documento restaurado correctamente.');
     }
 }

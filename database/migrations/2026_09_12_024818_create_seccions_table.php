@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('parent_id')->nullable()->constrained('secciones')->cascadeOnDelete();
             $table->string('nombre');
             $table->string('tipo')->nullable(); // 'anio' | 'periodo' | 'categoria' | 'libre'
+            $table->enum('modo_vista', ['lista', 'carpetas'])->default('carpetas'); // <-- LÍNEA NUEVA
             $table->integer('orden')->default(0);
             $table->timestamps();
         });
