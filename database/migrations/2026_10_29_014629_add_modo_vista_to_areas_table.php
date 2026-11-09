@@ -9,17 +9,24 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up(): void
-{
-    Schema::table('areas', function (Blueprint $table) {
-        $table->string('modo_vista')->default('lista');
-    });
-}
+    public function up(): void
+    {
+        Schema::table('areas', function (Blueprint $table) {
+            if (!Schema::hasColumn('areas', 'modo_vista')) {
+                $table->string('modo_vista')->default('lista');
+            }
+        });
+    }
 
-public function down(): void
-{
-    Schema::table('areas', function (Blueprint $table) {
-        $table->dropColumn('modo_vista');
-    });
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('areas', function (Blueprint $table) {
+            if (Schema::hasColumn('areas', 'modo_vista')) {
+                $table->dropColumn('modo_vista');
+            }
+        });
     }
 };

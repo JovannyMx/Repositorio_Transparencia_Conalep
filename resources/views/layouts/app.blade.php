@@ -7,6 +7,9 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- Favicon CONALEP -->
+        <link rel="icon" type="image/png" href="{{ asset('Conalep-logo.png') }}?v=12">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -39,13 +42,9 @@
         <!-- Script Global para Confirmación de Eliminación -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                // Usamos delegación de eventos para capturar cualquier envío de formulario en todo el sistema
                 document.body.addEventListener('submit', function (e) {
-                    
-                    // Verificamos si el formulario que se está enviando tiene la clase 'form-eliminar'
                     if (e.target && e.target.classList.contains('form-eliminar')) {
-                        e.preventDefault(); // Detenemos el envío inmediato
-                        
+                        e.preventDefault();
                         const form = e.target;
 
                         Swal.fire({
@@ -53,8 +52,8 @@
                             text: "Esta acción eliminará el registro de forma permanente y no se puede deshacer.",
                             icon: 'warning',
                             showCancelButton: true,
-                            confirmButtonColor: '#ef4444', // Tailwind red-500
-                            cancelButtonColor: '#64748b',  // Tailwind slate-500
+                            confirmButtonColor: '#ef4444',
+                            cancelButtonColor: '#64748b',
                             confirmButtonText: 'Sí, eliminar',
                             cancelButtonText: 'Cancelar',
                             customClass: {
@@ -62,7 +61,6 @@
                             }
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                // Si el usuario confirma, enviamos el formulario
                                 form.submit();
                             }
                         });
