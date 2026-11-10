@@ -6,6 +6,7 @@ use App\Models\Documento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 /*
@@ -14,7 +15,7 @@ use Carbon\Carbon;
 |--------------------------------------------------------------------------
 */
 
-// Alias directo para que 'publico.areas.index' no marque error en Blade
+// 1. Alias directo para que 'publico.areas.index' no marque error en Blade
 Route::get('/', function () {
     if (Schema::hasTable('areas')) {
         $areas = Area::where('activo', true)
@@ -39,7 +40,7 @@ Route::get('/home', function () {
     return redirect()->route('publico.areas.index');
 })->name('home');
 
-// 2. Vista Detallada por Área
+// 2. Vista Detallada por Área (Incrementa 'visitas' al ingresar al Área)
 Route::get('/area/{slug}', function ($slug) {
     $area = Area::where('slug', $slug)
         ->where('activo', true)
@@ -52,6 +53,9 @@ Route::get('/area/{slug}', function ($slug) {
               ->latest();
         }])
         ->firstOrFail();
+
+    // REGISTRO DE MÉTRICA: Incrementar visitas al área
+    $area->increment('visitas');
 
     $documentos = $area->documentos;
 
@@ -92,15 +96,21 @@ Route::get('/contacto-transparencia', function () {
     return view('contacto-transparencia');
 })->name('contacto.public');
 
-// 5. Visualización Pública de Documentos (Sin autenticación para iframe/modal)
-Route::get('/documentos/{documento}/ver', function (Documento $documento) {
+// 5. Visualización Pública de Documentos (Botón 'Visualizar' -> Incrementa 'vistas')
+Route::get('/documentos/{documento}/ver', function ($id) {
+    $documento = Documento::findOrFail($id);
+
     if (!$documento->activo || ($documento->fecha_vencimiento && $documento->fecha_vencimiento->isPast() && !$documento->fecha_vencimiento->isToday())) {
         abort(404, 'El documento ha vencido o no está disponible.');
     }
 
+    // REGISTRO DE MÉTRICA: Incrementar contador de vistas
+    $documento->increment('vistas');
+
+    // 1. Si usa Spatie MediaLibrary
     if (method_exists($documento, 'getFirstMedia')) {
         $media = $documento->getFirstMedia('archivo');
-        if ($media) {
+        if ($media && file_exists($media->getPath())) {
             return response()->file($media->getPath(), [
                 'Content-Type' => $media->mime_type,
                 'Content-Disposition' => 'inline; filename="' . $media->file_name . '"'
@@ -108,12 +118,43 @@ Route::get('/documentos/{documento}/ver', function (Documento $documento) {
         }
     }
 
+    // 2. Si se guarda por archivo_path en storage/app/public
     if (!empty($documento->archivo_path) && file_exists(storage_path('app/public/' . $documento->archivo_path))) {
         return response()->file(storage_path('app/public/' . $documento->archivo_path));
     }
 
     abort(404, 'El archivo solicitado no se encuentra disponible.');
 })->name('documentos.public.ver');
+
+// 6. Descarga Pública de Documentos (Botón 'Descargar' -> Incrementa 'descargas')
+Route::get('/documentos/{documento}/descargar', function ($id) {
+    $documento = Documento::findOrFail($id);
+
+    if (!$documento->activo || ($documento->fecha_vencimiento && $documento->fecha_vencimiento->isPast() && !$documento->fecha_vencimiento->isToday())) {
+        abort(404, 'El documento ha vencido o no está disponible.');
+    }
+
+    // REGISTRO DE MÉTRICA: Incrementar contador de descargas
+    $documento->increment('descargas');
+
+    // 1. Si usa Spatie MediaLibrary
+    if (method_exists($documento, 'getFirstMedia')) {
+        $media = $documento->getFirstMedia('archivo');
+        if ($media && file_exists($media->getPath())) {
+            return response()->download($media->getPath(), $media->file_name);
+        }
+    }
+
+    // 2. Si se guarda por archivo_path en storage public
+    if (!empty($documento->archivo_path) && Storage::disk('public')->exists($documento->archivo_path)) {
+        $rutaFisica = storage_path('app/public/' . $documento->archivo_path);
+        $extension = pathinfo($rutaFisica, PATHINFO_EXTENSION) ?: 'pdf';
+
+        return response()->download($rutaFisica, $documento->nombre . '.' . $extension);
+    }
+
+    abort(404, 'El archivo solicitado no se encuentra disponible.');
+})->name('documentos.public.descargar');
 
 
 /*
@@ -123,7 +164,35 @@ Route::get('/documentos/{documento}/ver', function (Documento $documento) {
 */
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    // Consultas para el panel de métricas y analíticas
+    $totalVisitasAreas = Area::sum('visitas');
+    $totalVistasDocs = Documento::sum('vistas');
+    $totalDescargasDocs = Documento::sum('descargas');
+    $totalAreas = Area::where('activo', true)->count();
+    $totalDocs = Documento::where('activo', true)->count();
+
+    // Top 5 áreas más consultadas
+    $areasPopulares = Area::where('activo', true)
+        ->orderBy('visitas', 'desc')
+        ->take(5)
+        ->get();
+
+    // Top 5 documentos con más interacción (vistas + descargas)
+    $documentosPopulares = Documento::where('activo', true)
+        ->with('area')
+        ->orderByRaw('(vistas + descargas) DESC')
+        ->take(5)
+        ->get();
+
+    return view('dashboard', compact(
+        'totalVisitasAreas',
+        'totalVistasDocs',
+        'totalDescargasDocs',
+        'totalAreas',
+        'totalDocs',
+        'areasPopulares',
+        'documentosPopulares'
+    ));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

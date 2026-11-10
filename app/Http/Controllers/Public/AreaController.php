@@ -33,7 +33,10 @@ class AreaController extends Controller
         // 1. Validar que el Área esté activa
         abort_unless($area->activo, 404);
 
-        // 2. Cargar las secciones RAÍZ (parent_id = null) que estén ACTIVAS y NO ELIMINADAS,
+        // 2. Incrementar contador de visitas del área pública
+        $area->increment('visitas');
+
+        // 3. Cargar las secciones RAÍZ (parent_id = null) que estén ACTIVAS y NO ELIMINADAS,
         // junto con su árbol completo de subsecciones activas.
         $secciones = $area->secciones()
             ->whereNull('parent_id')
@@ -48,7 +51,7 @@ class AreaController extends Controller
             ->orderBy('orden')
             ->get();
 
-        // 3. Función recursiva para recolectar únicamente los IDs de secciones activas
+        // 4. Función recursiva para recolectar únicamente los IDs de secciones activas
         $obtenerIdsValidos = function ($coleccion) use (&$obtenerIdsValidos) {
             $ids = [];
             foreach ($coleccion as $seccion) {
@@ -65,7 +68,7 @@ class AreaController extends Controller
 
         $idsSeccionesActivas = $obtenerIdsValidos($secciones);
 
-        // 4. Traer los documentos del área que pertenezcan a secciones válidas O que no tengan sección,
+        // 5. Traer los documentos del área que pertenezcan a secciones válidas O que no tengan sección,
         // asegurando que estén ACTIVOS y NO VENCIDOS (sin borrar nada de la BD).
         $documentos = Documento::query()
             ->where('area_id', $area->id)

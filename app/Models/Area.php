@@ -12,7 +12,7 @@ class Area extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'nombre', 'slug', 'icono', 'descripcion_corta', 'orden', 'activo', 'modo_vista',
+        'nombre', 'slug', 'icono', 'descripcion_corta', 'orden', 'activo', 'modo_vista','visitas',
     ];
 
     protected $casts = [

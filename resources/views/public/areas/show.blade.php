@@ -58,27 +58,24 @@
             </div>
         </section>
 
-        <!-- DATOS OCULTOS PARA JS (FILTRADO STRICTO EN CASCADA DE ANCESTROS Y VISIBILIDAD) -->
+        <!-- DATOS OCULTOS PARA JS (CON RUTAS SEPARADAS DE VER Y DESCARGAR) -->
         <div id="datos-crudos" class="hidden">
             @foreach ($documentos ?? [] as $doc)
                 @php
                     $seccionActual = $doc->seccion;
                     $esVisible = true;
 
-                    // Evaluamos recursivamente 'activo', 'publico' y 'deleted_at' en toda la cadena de padres
                     while ($seccionActual) {
                         $estaActiva = (bool) ($seccionActual->activo ?? true);
                         $esPublica = isset($seccionActual->publico) 
                             ? (bool)$seccionActual->publico 
                             : (isset($seccionActual->is_public) ? (bool)$seccionActual->is_public : true);
 
-                        // Si la sección o un ancestro está desactivado, no visible al público o eliminado
                         if (!$estaActiva || !$esPublica || !is_null($seccionActual->deleted_at)) {
                             $esVisible = false;
                             break;
                         }
 
-                        // Subir al padre
                         $seccionActual = $seccionActual->parentRecursive ?? $seccionActual->parent;
                     }
                 @endphp
@@ -95,14 +92,17 @@
                         $docFormato = $media ? pathinfo($media->file_name, PATHINFO_EXTENSION) : ($doc->extension ?? 'PDF');
                         $docTamaño = $media ? $media->human_readable_size : ($doc->tamano ?? 'N/A');
                         
-                        $docUrl = route('documentos.public.ver', $doc);
+                        // Rutas diferenciadas para el conteo de analíticas
+                        $docUrlVer = route('documentos.public.ver', $doc);
+                        $docUrlDescargar = route('documentos.public.descargar', $doc);
                     @endphp
                     <div 
                         class="data-doc"
                         data-nombre="{{ strtolower($docNombre) }}"
                         data-categoria="{{ $docCategoria }}"
                         data-seccion="{{ $seccionNombre }}"
-                        data-url="{{ $docUrl }}"
+                        data-url-ver="{{ $docUrlVer }}"
+                        data-url-descargar="{{ $docUrlDescargar }}"
                         data-formato="{{ strtolower($docFormato) }}"
                         data-size="{{ $docTamaño }}"
                         data-raw-nombre="{{ $docNombre }}"
@@ -188,9 +188,9 @@
                 </div>
                 <div id="unsupportedViewer" class="w-full h-full hidden flex flex-col items-center justify-center text-center p-6">
                     <p class="text-slate-600 mb-4 font-medium">Este formato no admite previsualización en vivo.</p>
-                    <a id="downloadFallback" href="#" download class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition">
+                    <button id="downloadFallback" onclick="" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition">
                         Descargar Documento
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -234,13 +234,20 @@
                     nombreFiltro: nodo.getAttribute('data-nombre'),
                     categoria: nodo.getAttribute('data-categoria'),
                     seccion: nodo.getAttribute('data-seccion'),
-                    url: nodo.getAttribute('data-url'),
+                    urlVer: nodo.getAttribute('data-url-ver'),
+                    urlDescargar: nodo.getAttribute('data-url-descargar'),
                     formato: nodo.getAttribute('data-formato'),
                     size: nodo.getAttribute('data-size'),
                     nombre: nodo.getAttribute('data-raw-nombre'),
                     fecha: nodo.getAttribute('data-fecha')
                 });
             });
+        }
+
+        /* ---------------- FUNCIÓN DE DESCARGA DIRECTA CON CACHE-BREAK ---------------- */
+        function descargarDocumento(urlDescargar) {
+            const urlFinal = urlDescargar + (urlDescargar.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+            window.location.href = urlFinal;
         }
 
         function renderizarLista(docs = documentosGlobal) {
@@ -271,12 +278,12 @@
                         </td>
                         <td class="py-4 px-6 text-right whitespace-nowrap">
                             <div class="inline-flex items-center gap-2">
-                                <button onclick="openDocumentViewer('${doc.url}', '${nombreEscapado}', '${doc.formato}')" class="inline-flex items-center gap-1 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                                <button onclick="openDocumentViewer('${doc.urlVer}', '${nombreEscapado}', '${doc.formato}')" class="inline-flex items-center gap-1 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
                                     Visualizar
                                 </button>
-                                <a href="${doc.url}" target="_blank" download class="inline-flex items-center gap-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-lg transition border border-slate-300">
+                                <button onclick="descargarDocumento('${doc.urlDescargar}')" class="inline-flex items-center gap-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-lg transition border border-slate-300">
                                     Descargar
-                                </a>
+                                </button>
                             </div>
                         </td>
                     </tr>`;
@@ -341,8 +348,8 @@
                         <div class="flex items-center justify-between pt-2 border-t border-slate-200 text-xs">
                             <span class="font-bold text-indigo-600 uppercase text-[10px]">${doc.formato} (${doc.size})</span>
                             <div class="flex items-center gap-1">
-                                <button onclick="openDocumentViewer('${doc.url}', '${nombreEscapado}', '${doc.formato}')" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded text-[11px] transition">Ver</button>
-                                <a href="${doc.url}" target="_blank" download class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded text-[11px] transition">&darr;</a>
+                                <button onclick="openDocumentViewer('${doc.urlVer}', '${nombreEscapado}', '${doc.formato}')" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded text-[11px] transition">Ver</button>
+                                <button onclick="descargarDocumento('${doc.urlDescargar}')" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded text-[11px] transition">&darr;</button>
                             </div>
                         </div>
                     </div>`;
@@ -374,6 +381,7 @@
             }
         }
 
+        /* ---------------- VISUALIZADOR DE DOCUMENTOS CON CACHE-BREAK ---------------- */
         function openDocumentViewer(url, title, extension) {
             const modal = document.getElementById('viewerModal');
             document.getElementById('viewerTitle').textContent = title;
@@ -387,15 +395,17 @@
             imageViewer.classList.add('hidden');
             unsupportedViewer.classList.add('hidden');
 
+            const urlFinal = url + (url.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+
             const ext = extension.toLowerCase();
             if (ext === 'pdf' || url.includes('/documentos/') || url.endsWith('.pdf')) {
-                pdfFrame.src = url;
+                pdfFrame.src = urlFinal;
                 pdfFrame.classList.remove('hidden');
             } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
-                imgFrame.src = url;
+                imgFrame.src = urlFinal;
                 imageViewer.classList.remove('hidden');
             } else {
-                downloadFallback.href = url;
+                downloadFallback.setAttribute('onclick', `descargarDocumento('${url}')`);
                 unsupportedViewer.classList.remove('hidden');
             }
             modal.classList.remove('hidden');

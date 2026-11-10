@@ -66,7 +66,7 @@
         </div>
     </section>
 
-    <!-- DATOS OCULTOS PARA PROCESAMIENTO JS (Siempre se imprimen para alimentar las carpetas si aplica) -->
+    <!-- DATOS OCULTOS PARA PROCESAMIENTO JS -->
     <div id="datos-crudos" class="hidden">
         @forelse ($documentos ?? [] as $doc)
             @php
@@ -78,7 +78,11 @@
                 $media = (is_object($doc) && method_exists($doc, 'getFirstMedia')) ? $doc->getFirstMedia('archivo') : null;
                 $docFormato = $media ? pathinfo($media->file_name, PATHINFO_EXTENSION) : (is_array($doc) ? ($doc['formato'] ?? 'PDF') : ($doc->formato ?? 'PDF'));
                 $docTamaño = $media ? $media->human_readable_size : (is_array($doc) ? ($doc['tamaño'] ?? 'N/A') : ($doc->tamaño ?? 'N/A'));
-                $docUrl = $docId ? route('documentos.public.ver', $docId) : '#';
+                
+                // Rutas independientes para incrementar métricas por separado
+                $docUrlVer = $docId ? route('documentos.public.ver', $docId) : '#';
+                $docUrlDescargar = $docId ? route('documentos.public.descargar', $docId) : '#';
+
                 $yearFecha = is_object($doc) && isset($doc->created_at) ? $doc->created_at->format('Y') : (substr($docFecha, -4) ?: 'General');
             @endphp
             <div 
@@ -86,7 +90,8 @@
                 data-nombre="{{ strtolower($docNombre) }}"
                 data-categoria="{{ $docCategoria }}"
                 data-year="{{ $yearFecha }}"
-                data-url="{{ $docUrl }}"
+                data-url-ver="{{ $docUrlVer }}"
+                data-url-descargar="{{ $docUrlDescargar }}"
                 data-formato="{{ strtolower($docFormato) }}"
                 data-size="{{ $docTamaño }}"
                 data-raw-nombre="{{ $docNombre }}"
@@ -96,9 +101,7 @@
         @endforelse
     </div>
 
-    <!-- =================================--------------------- -->
     <!-- MODO 1: VISTA EN LISTA TRADICIONAL (TABLA) -->
-    <!-- =================================--------------------- -->
     <section id="contenedorLista" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
             <h2 class="text-base font-bold text-conalep-dark flex items-center gap-2">
@@ -106,7 +109,6 @@
                 Documentos Disponibles
             </h2>
             <span id="contador-resultados" class="text-xs bg-conalep-light text-conalep-dark font-bold px-3 py-1 rounded-full border border-conalep-mint/40">
-                <!-- Se llena con JS -->
             </span>
         </div>
 
@@ -122,22 +124,16 @@
                     </tr>
                 </thead>
                 <tbody id="tbody-lista" class="divide-y divide-slate-200 text-sm">
-                    <!-- Se renderiza vía JS -->
                 </tbody>
             </table>
         </div>
     </section>
 
-    <!-- =================================--------------------- -->
-    <!-- MODO 2: VISTA EN CARPETAS (DISEÑO VISUAL DE GRID/TARJETAS) -->
-    <!-- =================================--------------------- -->
+    <!-- MODO 2: VISTA EN CARPETAS (GRID/TARJETAS) -->
     <section id="contenedorCarpetas" class="hidden">
-        <!-- Tarjetas principales estilo explorador de archivos -->
         <div id="gridCarpetasPadre" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- Renderizado dinámico vía JavaScript -->
         </div>
 
-        <!-- Vista detallada del contenido de la carpeta seleccionada -->
         <div id="detalleCarpetaHijo" class="hidden mt-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-4">
                 <div class="flex items-center gap-3">
@@ -149,17 +145,13 @@
                         &larr; Volver a Carpetas
                     </button>
                     <h3 id="tituloCarpetaActiva" class="text-base font-bold text-conalep-dark">
-                        <!-- Nombre carpeta activa -->
                     </h3>
                 </div>
                 <span id="badgeConteoHijos" class="text-xs bg-conalep-light text-conalep-dark font-bold px-3 py-1 rounded-full border border-conalep-mint/40">
-                    <!-- Conteo de archivos -->
                 </span>
             </div>
 
-            <!-- Grid de archivos hijos -->
             <div id="gridArchivosHijos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Archivos de la carpeta -->
             </div>
         </div>
     </section>
@@ -182,17 +174,16 @@
                 </div>
                 <div id="unsupportedViewer" class="w-full h-full hidden flex flex-col items-center justify-center text-center p-6">
                     <p class="text-slate-600 mb-4 font-medium">Este formato no admite previsualización en vivo.</p>
-                    <a id="downloadFallback" href="#" download class="px-4 py-2 bg-conalep-green hover:bg-conalep-dark text-white text-xs font-bold rounded-lg transition">
+                    <button id="downloadFallback" onclick="" class="px-4 py-2 bg-conalep-green hover:bg-conalep-dark text-white text-xs font-bold rounded-lg transition">
                         Descargar Documento
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- PREPARAMOS LA VARIABLE EN PHP FUERA DEL SCRIPT PARA EVITAR ERRORES DEL EDITOR -->
     @php
-        $modoVistaActual = 'lista'; // Por defecto
+        $modoVistaActual = 'lista';
         if(isset($area)) {
             $modoVistaActual = is_array($area) ? ($area['modo_vista'] ?? 'lista') : ($area->modo_vista ?? 'lista');
         } elseif(isset($seccion)) {
@@ -202,9 +193,7 @@
 
     <!-- SCRIPT DE LÓGICA -->
     <script>
-        // Leemos la variable que ya procesó PHP arriba
         const MODO_VISTA_ADMIN = "{{ $modoVistaActual }}";
-        console.log("Modo de vista cargado desde la BD:", MODO_VISTA_ADMIN);
         
         let documentosGlobal = [];
         let gruposCarpetas = {};
@@ -220,7 +209,6 @@
                 renderizarLista();
             }
 
-            // Filtros en tiempo real
             const inputBusqueda = document.getElementById('input-busqueda');
             const selectCategoria = document.getElementById('select-categoria');
 
@@ -232,18 +220,26 @@
 
         function extraerDatosCrudos() {
             const nodos = document.querySelectorAll('.data-doc');
+            documentosGlobal = [];
             nodos.forEach(nodo => {
                 documentosGlobal.push({
                     nombreFiltro: nodo.getAttribute('data-nombre'),
                     categoria: nodo.getAttribute('data-categoria'),
                     year: nodo.getAttribute('data-year'),
-                    url: nodo.getAttribute('data-url'),
+                    urlVer: nodo.getAttribute('data-url-ver'),
+                    urlDescargar: nodo.getAttribute('data-url-descargar'),
                     formato: nodo.getAttribute('data-formato'),
                     size: nodo.getAttribute('data-size'),
                     nombre: nodo.getAttribute('data-raw-nombre'),
                     fecha: nodo.getAttribute('data-fecha')
                 });
             });
+        }
+
+        /* ---------------- FUNCIÓN DE DESCARGA DIRECTA CON CACHE-BREAK ---------------- */
+        function descargarDocumento(urlDescargar) {
+            const urlFinal = urlDescargar + (urlDescargar.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+            window.location.href = urlFinal;
         }
 
         /* ---------------- LÓGICA VISTA LISTA ---------------- */
@@ -275,12 +271,12 @@
                         </td>
                         <td class="py-4 px-6 text-right whitespace-nowrap">
                             <div class="inline-flex items-center gap-2">
-                                <button onclick="openDocumentViewer('${doc.url}', '${nombreEscapado}', '${doc.formato}')" class="inline-flex items-center gap-1 text-xs bg-conalep-green hover:bg-conalep-dark text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                                <button onclick="openDocumentViewer('${doc.urlVer}', '${nombreEscapado}', '${doc.formato}')" class="inline-flex items-center gap-1 text-xs bg-conalep-green hover:bg-conalep-dark text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
                                     Visualizar
                                 </button>
-                                <a href="${doc.url}" target="_blank" download class="inline-flex items-center gap-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-lg transition border border-slate-300">
+                                <button onclick="descargarDocumento('${doc.urlDescargar}')" class="inline-flex items-center gap-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-lg transition border border-slate-300">
                                     Descargar
-                                </a>
+                                </button>
                             </div>
                         </td>
                     </tr>`;
@@ -299,7 +295,6 @@
             const gridPadre = document.getElementById('gridCarpetasPadre');
             const claves = Object.keys(gruposCarpetas).sort().reverse();
             
-            // Si hay filtros activos, cerrar la vista de detalle
             cerrarDetalleCarpeta();
 
             if (!claves.length) {
@@ -346,8 +341,8 @@
                         <div class="flex items-center justify-between pt-2 border-t border-slate-200 text-xs">
                             <span class="font-bold text-conalep-magenta uppercase text-[10px]">${doc.formato} (${doc.size})</span>
                             <div class="flex items-center gap-1">
-                                <button onclick="openDocumentViewer('${doc.url}', '${nombreEscapado}', '${doc.formato}')" class="px-2.5 py-1 bg-conalep-green hover:bg-conalep-dark text-white font-bold rounded text-[11px] transition">Ver</button>
-                                <a href="${doc.url}" target="_blank" download class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded text-[11px] transition">&darr;</a>
+                                <button onclick="openDocumentViewer('${doc.urlVer}', '${nombreEscapado}', '${doc.formato}')" class="px-2.5 py-1 bg-conalep-green hover:bg-conalep-dark text-white font-bold rounded text-[11px] transition">Ver</button>
+                                <button onclick="descargarDocumento('${doc.urlDescargar}')" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded text-[11px] transition">&darr;</button>
                             </div>
                         </div>
                     </div>`;
@@ -380,7 +375,7 @@
             }
         }
 
-        /* ---------------- VISUALIZADOR ---------------- */
+        /* ---------------- VISUALIZADOR DE DOCUMENTOS CON CACHE-BREAK ---------------- */
         function openDocumentViewer(url, title, extension) {
             const modal = document.getElementById('viewerModal');
             document.getElementById('viewerTitle').textContent = title;
@@ -394,15 +389,17 @@
             imageViewer.classList.add('hidden');
             unsupportedViewer.classList.add('hidden');
 
+            const urlFinal = url + (url.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+
             const ext = extension.toLowerCase();
             if (ext === 'pdf' || url.includes('/documentos/') || url.endsWith('.pdf')) {
-                pdfFrame.src = url;
+                pdfFrame.src = urlFinal;
                 pdfFrame.classList.remove('hidden');
             } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
-                imgFrame.src = url;
+                imgFrame.src = urlFinal;
                 imageViewer.classList.remove('hidden');
             } else {
-                downloadFallback.href = url;
+                downloadFallback.setAttribute('onclick', `descargarDocumento('${url}')`);
                 unsupportedViewer.classList.remove('hidden');
             }
             modal.classList.remove('hidden');

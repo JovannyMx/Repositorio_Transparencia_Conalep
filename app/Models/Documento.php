@@ -19,7 +19,7 @@ class Documento extends Model implements HasMedia
     protected $fillable = [
         'area_id', 'seccion_id', 'nombre', 'archivo_path', 'extension',
         'tamano', 'liga_publica', 'orden', 'fecha_publicacion',
-        'fecha_actualizacion', 'activo', 'fecha_vencimiento',
+        'fecha_actualizacion', 'activo', 'fecha_vencimiento','vistas','descargas',
     ];
 
     protected $casts = [
